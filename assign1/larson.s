@@ -9,11 +9,14 @@
  .globl _start       # mark _start symbol where execution begins
  _start:
     lui     a0,0x2000       # a0 holds base addr PB group = 0x2000000
-    addi    a1,zero,1       # a1 holds constant 1
+    li      t1, 0x11111
+    lui     a1, 0x11
+    addi    a1,a1,0x111      # a1 holds constant 1
     sw      a1,0x30(a0)     # config PB0 as output
-
+    add    a1, zero, zero
+   # li      t0, 0x1f
 loop:
-    xori    a1,a1,1         # xor ^ 1 invert a1
+    xori     a1,a1,0x1f         # xor ^ 1 invert a1
     sw      a1,0x40(a0)     # set data value of PB0 to a1
 
     lui     a2,0x3f00       # a2 = init countdown value
