@@ -20,7 +20,6 @@ extension.bin: extension.s
 extension: extension.bin
 	mango-run extension.bin
 
-
 # `make clean` removes all compiled build products
 clean:
 	rm -f larson.o larson.elf larson.bin extension.o extension.elf extension.bin
