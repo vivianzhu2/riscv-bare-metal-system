@@ -1,1 +1,25 @@
-// Style reflection submitted with assign1
+/ Style reflection submitted with assign1 
+
+1. Tell us a little bit about your journey thus far in developing your programming style. What importance do you place on style? Any memorable experiences you have had in giving or receiving feedback on style? A struggle, aspiration, or victory to share?
+
+I remember in 106b, I forgot to do the header comment and was confused on why it was important, because I usually come back to do comments and missed the top part. Therefore, I then realized that as Nick Parlante wrote, to write the high quality version first. Make sure that the program is at the "A" level first, not go back and revise for the style. This way the code itself is more organized and it saves more time of checking and altering for the style guide instead of embracing it and getting it right the first time. In addition, I won't have to scroll up too far and miss the header comments!
+
+2. Review the C style guides linked above, pick a few points that stood out to you and tell us about them. It could be something you think is elegant, something you were surprised by, something you want to learn more about, or something you plan to adopt for yourself.
+
+I liked the 120 character rule, because I had no clue that there would be a threshold to keep the lines tidy but it makes so much sense and makes the sentences more orderly. In addition I will note to stop using global variables and redundant if statements of articulating if x==0, and x!=0. I also like adding comments to closing brackets, because then we can make sure there are no syntax errors and that they all match, as well as understanding each of the nested layers.
+
+3. Why is it good practice to always enclose body of an if statement in braces, even if the body is just one line and doesn't require the braces? More specifically, what is the error that can occur if you do not use braces?
+
+Braces help group together the chunks to run within the if statement without confusion. Otherwise, the indentation could confuse the compiler and it could run the if condition code anyway no matter if it passes the if.
+
+
+4. Point us to a URL for a piece of published code whose style and design choices you found particularly pleasing or inspiring or learned something interesting from. What made that code stand out to you?
+
+https://github.com/microsoft/vscode/blob/main/src/vs/code/electron-main/main.ts
+In this piece of code from vscode, my main coding platform,  the comments are very concise per each chunk, but each section has a detailed reasonign of why it is there. The debugging and edge case programming is well documented but the other sare concise but comprehensive. It keeps track of all of the outputs what each case would return.
+
+
+5. You'll be writing a lot of code this quarter, which means lots of opportunity to practice and improve your craft. What aspects of coding quality are you most eager to improve upon in the code you will produce? How can we help you reach those goals?
+
+
+The coding quality I am most excited to produce is to reduce the redundant errors and global variables, and I would like constant reminders to achieve this goal. I also would like to minimize the lines of code so that my code is more clear and articulate.
