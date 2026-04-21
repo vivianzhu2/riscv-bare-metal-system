@@ -36,6 +36,59 @@ static void test_gpio_set_get_function(void) {
     assert( gpio_get_function(GPIO_PC0) == GPIO_FN_INPUT );
 
     /***** TODO: add more tests *****/
+    for(int i = GPIO_PB0; i < GPIO_PB_LAST_INDEX; i++){
+       gpio_set_input(i);
+       assert(gpio_get_function(i) == GPIO_FN_INPUT);
+       gpio_set_output(i);
+       assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
+     }
+
+    for(int i = GPIO_PC0; i < GPIO_PC_LAST_INDEX; i++){
+       gpio_set_input(i);
+       assert(gpio_get_function(i) == GPIO_FN_INPUT);
+       gpio_set_output(i);
+       assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
+     } 
+
+    for(int i = GPIO_PD0; i < GPIO_PD_LAST_INDEX; i++){
+       if(i == GPIO_PD18){
+           continue;
+       }
+       gpio_set_input(i);
+       assert(gpio_get_function(i) == GPIO_FN_INPUT);
+       gpio_set_output(i);
+       assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
+     }
+    for(int i = GPIO_PE0; i < GPIO_PE_LAST_INDEX; i++){
+       gpio_set_input(i);
+       assert(gpio_get_function(i) == GPIO_FN_INPUT);
+       gpio_set_output(i);
+       assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
+     }
+    for(int i = GPIO_PF0; i < GPIO_PF_LAST_INDEX; i++){
+       gpio_set_input(i);
+       assert(gpio_get_function(i) == GPIO_FN_INPUT);
+       gpio_set_output(i);
+       assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
+     }  
+
+// add one about the reconfiguration pins
+    gpio_set_output(GPIO_PB1);
+    gpio_set_input(GPIO_PB1);
+    gpio_set_function(GPIO_PB1, GPIO_FN_DISABLED);
+    assert(gpio_get_function(GPIO_PB1) == GPIO_FN_DISABLED);
+//  any valid pins
+    gpio_set_output(GPIO_PF2);
+    gpio_set_input(GPIO_PF2);
+    gpio_set_function(GPIO_PF2, GPIO_FN_ALT7);
+    assert(gpio_get_function(GPIO_PF2) == GPIO_FN_ALT7);
+
+// independent pin configuration
+   gpio_set_function(GPIO_PE5, GPIO_FN_OUTPUT);
+   gpio_set_function(GPIO_PE4, GPIO_FN_ALT3);
+   assert(gpio_get_function(GPIO_PE5) == GPIO_FN_OUTPUT);  // PE5 survived PE4's write
+   assert(gpio_get_function(GPIO_PE4) == GPIO_FN_ALT3); 
+// BE CAREFUL FOR SPECIA PINS PD18, PF0 PF1 PF3 PF5 PB8 PB9
 }
 
 static void test_gpio_read_write(void) {
@@ -57,6 +110,36 @@ static void test_gpio_read_write(void) {
     assert( gpio_read(GPIO_PB4) ==  0 );
 
     /***** TODO: add more tests *****/
+     for(int i = GPIO_PB0; i < GPIO_PB_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
+     for(int i = GPIO_PC0; i < GPIO_PC_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
+     for(int i = GPIO_PD0; i < GPIO_PD_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
+     for(int i = GPIO_PD0; i < GPIO_PD_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
+     for(int i = GPIO_PE0; i < GPIO_PE_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
+     for(int i = GPIO_PF0; i < GPIO_PF_LAST_INDEX; i++){
+       gpio_set_output(i);
+       gpio_write(i, 0);
+       assert(gpio_read(i) ==  0);
+     }
 }
 
 static void test_leds(void) {
@@ -118,15 +201,15 @@ static void test_breadboard_connections(void) {
 void main(void) {
     gpio_init();
     timer_init();
+   
 
-    // Uncomment the call to each test function below when you have implemented
+ // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
-
     test_gpio_set_get_function();
-    // test_gpio_read_write();
+//    test_gpio_read_write();
     // test_leds();
-    // test_timer();
-    // test_breadboard_connections();
+//    test_timer();
+//    test_breadboard_connections();
 
     /***** TODO: Add more and better tests!  *****/
 }

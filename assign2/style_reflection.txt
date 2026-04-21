@@ -1,1 +1,15 @@
 // Style reflection submitted with assign2
+
+Take a look at how we asked you to handle errors in your input for gpio_set_function. Why do we ask you to handle an error in this way rather than any alternative methods like returning a particular value as we do in other functions?
+
+In GPIO_Set function, we had multiple checkpoints of whether the input pin was valid and did not return a value but only an action. This is necessary because we used assert to handle invalid inputs and test for worthy answers. This keeps it safe of delegating tasks.
+
+After reading the section on declarations, review your clock code and tell us how many global variables you have. For each of your global variables, consider whether it should remain a global variable. If you think it should then make a short case as to why, if not then tell us how you would change it (i.e change to constant,make it a local variable in my display refresh loop, etc.)
+
+
+I have on global variable: DURATION: because it is flexible and depends on how long the countdown should be. I think this should remain a global variable so it is easy to adjust when needed.
+
+Take a look over the code you wrote for your gpio module and clock application and share your thoughts on your style. What parts of your code do you feel good about, what parts do you think could use some cleaning up? Is there any part you wish you knew how to do differently? Please be specific in your answer, include line numbers for any specific code you reference.
+
+I feel like inmy clock module, I did not use descriptive enough names because I kept trying to reuse the variable digit, which made the overall code confusing as I would just replace it with synonyms of digit. I know in my head what it means, but I can see how it can be confusing to the outside perspective, or even me in a few weeks. I liked the amount of functions I used for the clock module, I thought it made the code cleaner and easier to adjust things like the delay time and the values to display. In the GPIO module, I thought the code reflected my thought process well with its order and separation of variables. I did feel like I did a lot of copy pasting from one function to another, so was wondering if there was a way to make that more concise.
+
