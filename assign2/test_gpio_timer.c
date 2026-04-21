@@ -36,20 +36,21 @@ static void test_gpio_set_get_function(void) {
     assert( gpio_get_function(GPIO_PC0) == GPIO_FN_INPUT );
 
     /***** TODO: add more tests *****/
+    // test all the pins in the groups by setting them to input and output and confirming the get function returns the correct value for PB 
     for(int i = GPIO_PB0; i < GPIO_PB_LAST_INDEX; i++){
        gpio_set_input(i);
        assert(gpio_get_function(i) == GPIO_FN_INPUT);
        gpio_set_output(i);
        assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
      }
-
+    // extensive test for all pins in PC0-PC7  
     for(int i = GPIO_PC0; i < GPIO_PC_LAST_INDEX; i++){
        gpio_set_input(i);
        assert(gpio_get_function(i) == GPIO_FN_INPUT);
        gpio_set_output(i);
        assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
      } 
-
+    // extensive test for all pins in PD0-PD21 except PD18 
     for(int i = GPIO_PD0; i < GPIO_PD_LAST_INDEX; i++){
        if(i == GPIO_PD18){
            continue;
@@ -59,12 +60,14 @@ static void test_gpio_set_get_function(void) {
        gpio_set_output(i);
        assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
      }
+     //extensive test for all pins in PE0-PE5 
     for(int i = GPIO_PE0; i < GPIO_PE_LAST_INDEX; i++){
        gpio_set_input(i);
        assert(gpio_get_function(i) == GPIO_FN_INPUT);
        gpio_set_output(i);
        assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
      }
+     //extensive test for all pins in PF0-PF5
     for(int i = GPIO_PF0; i < GPIO_PF_LAST_INDEX; i++){
        gpio_set_input(i);
        assert(gpio_get_function(i) == GPIO_FN_INPUT);
@@ -72,23 +75,22 @@ static void test_gpio_set_get_function(void) {
        assert(gpio_get_function(i) == GPIO_FN_OUTPUT);
      }  
 
-// add one about the reconfiguration pins
-    gpio_set_output(GPIO_PB1);
+// add one about the reconfiguration property of the pins, i.e. setting a pin to output then input then disabled and confirming the get function returns the correct value for each step
     gpio_set_input(GPIO_PB1);
     gpio_set_function(GPIO_PB1, GPIO_FN_DISABLED);
     assert(gpio_get_function(GPIO_PB1) == GPIO_FN_DISABLED);
-//  any valid pins
+//  other valid functions like alternate functions and disabled function
     gpio_set_output(GPIO_PF2);
     gpio_set_input(GPIO_PF2);
     gpio_set_function(GPIO_PF2, GPIO_FN_ALT7);
     assert(gpio_get_function(GPIO_PF2) == GPIO_FN_ALT7);
 
-// independent pin configuration
+// independent pin configuration: setting one pin's function should not affect the function of another pin
    gpio_set_function(GPIO_PE5, GPIO_FN_OUTPUT);
    gpio_set_function(GPIO_PE4, GPIO_FN_ALT3);
    assert(gpio_get_function(GPIO_PE5) == GPIO_FN_OUTPUT);  // PE5 survived PE4's write
    assert(gpio_get_function(GPIO_PE4) == GPIO_FN_ALT3); 
-// BE CAREFUL FOR SPECIA PINS PD18, PF0 PF1 PF3 PF5 PB8 PB9
+// BE CAREFUL FOR SPECIAL PINS PD18
 }
 
 static void test_gpio_read_write(void) {
@@ -109,7 +111,7 @@ static void test_gpio_read_write(void) {
     gpio_write(GPIO_PB4, 0);
     assert( gpio_read(GPIO_PB4) ==  0 );
 
-    /***** TODO: add more tests *****/
+    // Test that gpio_write does not affect gpio_read for pins configured as input
      for(int i = GPIO_PB0; i < GPIO_PB_LAST_INDEX; i++){
        gpio_set_output(i);
        gpio_write(i, 0);
@@ -140,7 +142,18 @@ static void test_gpio_read_write(void) {
        gpio_write(i, 0);
        assert(gpio_read(i) ==  0);
      }
+    // Edge case: Test gpio_write and gpio_read on a pin configured as input
+    gpio_set_input(GPIO_PB5);
+    gpio_write(GPIO_PB5, 1); // Writing to an input pin should not affect its state
+    assert(gpio_read(GPIO_PB5) == 0); // gpio_read should still return 0 for an input pin
+
+    // Edge case: Test gpio_write with invalid values
+    gpio_set_output(GPIO_PB6);
+    gpio_write(GPIO_PB6, 2); // Invalid value, should not affect the pin state
+    assert(gpio_read(GPIO_PB6) == 0); // gpio_read should still return 0
+     
 }
+
 
 static void test_leds(void) {
     // Test that gpio turns on
