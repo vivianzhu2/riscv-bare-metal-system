@@ -71,7 +71,7 @@ test: $(TEST_PROGRAM)
 	mango-run $<
 
 # run the test program under gdb
-debug: $(EXTENSION_PROGRAM:.bin=.elf)
+debug: $(TEST_PROGRAM:.bin=.elf)
 	riscv64-unknown-elf-gdb --eval-command='set $$elf_file = "$<"' $(GDB_FLAGS) $<
 
 # Build and run the extension binary
