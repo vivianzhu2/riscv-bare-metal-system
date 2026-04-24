@@ -19,7 +19,7 @@
 #ifndef DURATION
 #define DURATION 67
 #endif
-unsigned char nums[10] = {0b00111111,0b00000110, 0b01011011, 0b01001111,0b01100110,0b01101101, 0b01111101, 0b00000111, 0b011111111, 0b01101111};
+unsigned char nums[10] = {0b00111111,0b00000110, 0b01011011, 0b01001111,0b01100110,0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01101111};
 
 int gpio_id[7] = {GPIO_PD17, GPIO_PB6, GPIO_PB12, GPIO_PB11, GPIO_PB10, GPIO_PD11, GPIO_PD13};
 int gpio_digits[4] = {GPIO_PB4, GPIO_PB3, GPIO_PB2, GPIO_PC0};
@@ -43,11 +43,11 @@ static void turn_on_segments(int number, int digit){
 
 void display_refresh_loop(int *values, int delay){
      for(int i=0; i < 1000/4/delay; i++){
-       for (int i = 0; i < 4; i++) {
-          gpio_write(gpio_digits[i], 1); // turn on the digit
-          turn_on_segments(values[i], i); // turn on the segments for the digit with the corresponding value
+       for (int j = 0; j < 4; j++) {
+          gpio_write(gpio_digits[j], 1); // turn on the digit
+          turn_on_segments(values[j], j); // turn on the segments for the digit with the corresponding value
           timer_delay_ms(delay); // delay for a short period of time to allow the digit to be visible
-          gpio_write(gpio_digits[i], 0); // turn off the digit before moving on to the next one 
+          gpio_write(gpio_digits[j], 0); // turn off the digit before moving on to the next one 
         }
      }
 }

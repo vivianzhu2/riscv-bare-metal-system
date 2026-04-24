@@ -3,7 +3,7 @@ RUN_PROGRAM   		= clock.bin
 TEST_PROGRAM  		= test_gpio_timer.bin
 EXTENSION_PROGRAM  	= extension.bin
 
-MY_MODULE_SOURCES 	= gpio.c timer.c timer_asm.s
+MY_MODULE_SOURCES 	= gpio.c timer.c timer_asm.s display.c
 
 PROGRAMS      		= $(RUN_PROGRAM) $(TEST_PROGRAM) $(EXTENSION_PROGRAM)
 
@@ -21,6 +21,13 @@ LDLIBS 	= -lmango_gcc
 ifdef DURATION
 clock.o: CFLAGS += -DDURATION=$(DURATION)
 .PHONY: clock.c
+endif
+
+# Extension-specific variable to set the display number on make command-line
+# Selectively apply phony to force rebuild of extension whenever set display value
+ifdef DISPLAY_VALUE
+extension.o: CFLAGS += -DDISPLAY_VALUE=$(DISPLAY_VALUE)
+.PHONY: extension.c
 endif
 
 # Common objects for the programs built by this makefile

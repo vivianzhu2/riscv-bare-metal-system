@@ -1,7 +1,6 @@
 /* File: gpio.c
  * ------------
-* Create four functions: gpio_set_function, gpio_get_function, 
-* gpio_read, gpio_write 
+* Create four functions: gpio_set_function, gpio_get_function, gpio_read, gpio_write 
 */
 #include "gpio.h"
 #include <stddef.h>
@@ -86,78 +85,107 @@ void gpio_set_output(gpio_id_t pin) {
     gpio_set_function(pin, GPIO_FN_OUTPUT);
 }
 // Function that configures a pin to a selected function.
+// ---------------------------------------------------------
+// Checks if the input pin is valid to continue
+// initialize the group and index of the input pin
+// establish the base address and adding the according index for 
+// the appropriate address
+// read in the current state for all pins in the cfg reg
+// modify the bits of interest by shfiting function to the left in bit_pos
+// write back the updated state 
 void gpio_set_function(gpio_id_t pin, unsigned int function) {
-
-
-   if (gpio_id_is_valid(pin)== false){  // if the pin is invalid, do not continue and return
+// configures a pin to a selected function
+   /***** TODO: Your code goes here *****/
+   if (gpio_id_is_valid(pin)== false){
       return;
    } 
    gpio_pin_t target_pin;
-   target_pin = get_group_and_index(pin); // get the group and index of the pin
+   target_pin = get_group_and_index(pin); 
    unsigned int group = target_pin.group;
    unsigned int index = target_pin.pin_index;
-   volatile unsigned int *base_reg = get_cfg0_reg(group); // get the base address of the cfg reg for the group
-   volatile unsigned int *targetreg = base_reg + index / 8; // get the address of the cfg0/1/2 reg 
-   unsigned int targetval = *targetreg;  // read in the current state of the cfg reg
-   int bit_pos = (index % 8) * 4;  // calculate the bit position of the function bits 
-   unsigned int shiftedfunction = (function << bit_pos); // shift the function to the left to align with the bit position
-   unsigned int shiftedpattern = ~ (0xf << bit_pos); // create a pattern to clear the function bits for the pin 
-   unsigned int results =( shiftedpattern & targetval) | shiftedfunction; // clear the function bits for the pin and set the new function 
-   *targetreg = results; // write back the updated state to the cfg reg
+   volatile unsigned int *base_reg = get_cfg0_reg(group);
+   volatile unsigned int *targetreg = base_reg + index / 8;
+   unsigned int targetval = *targetreg;
+   int bit_pos = (index % 8) * 4;
+   unsigned int shiftedfunction = (function << bit_pos);
+   unsigned int shiftedpattern = ~ (0xf << bit_pos);
+   unsigned int results =( shiftedpattern & targetval) | shiftedfunction;
+   *targetreg = results; 
    return;
 }
-
-// Function that gets the current function of a pin.
+// Function that configures a pin to a selected function. 
 // ---------------------------------------------------------
+// Checks if the input pin is valid to continue
+// initialize the group and index of the input pin
+// establish the base address and adding the according index for 
+// the appropriate address
+// read in the current state for all pins in the cfg reg
+// modify the bits of interest by shfiting function to the left in bit_pos
+// write back the updated state 
 unsigned int gpio_get_function(gpio_id_t pin) {
-   if (gpio_id_is_valid(pin)== false){  // if the pin is invalid, do not continue and return
+   if (gpio_id_is_valid(pin)== false){
       return -1;
    } 
    gpio_pin_t target_pin;
-   target_pin = get_group_and_index(pin); // get the group and index of the pin
+   target_pin = get_group_and_index(pin);
    unsigned int group = target_pin.group;
    unsigned int index = target_pin.pin_index;
-   volatile unsigned int *reg = get_cfg0_reg(group) + index / 8; // get the address of the cfg0/1/2 reg
-   int bit_pos = (index % 8) * 4; // calculate the bit position of the function bits for the pin
-   unsigned int target_val = *reg; // read in the current state of the cfg reg
-   unsigned int shiftedpattern = (0xf << bit_pos); // create a pattern to isolate the function bits 
-   unsigned int results = shiftedpattern & target_val; // isolate the function bits for the pin 
-   return (results>>bit_pos); // shift the results to the right to get the function value and return it
+   volatile unsigned int *reg = get_cfg0_reg(group) + index / 8;
+   int bit_pos = (index % 8) * 4;
+   unsigned int target_val = *reg;
+   unsigned int shiftedpattern = (0xf << bit_pos);
+   unsigned int results = shiftedpattern & target_val;
+   return (results>>bit_pos);
 }
-// Function that writes a value to a pin configured as output.
+// Function that configures a pin to a selected function. 
 // ---------------------------------------------------------
+// Checks if the input pin is valid to continue
+// initialize the group and index of the input pin
+// establish the base address and adding the according index for 
+// the appropriate address
+// read in the current state for all pins in the cfg reg
+// modify the bits of interest by shfiting function to the left in bit_pos
+// write back the updated state 
 void gpio_write(gpio_id_t pin, int value) {
-   if (gpio_id_is_valid(pin)== false){ // if the pin is invalid, do not continue and return
+   if (gpio_id_is_valid(pin)== false){
       return;
    }
    gpio_pin_t target_pin;
-   target_pin = get_group_and_index(pin); // get the group and index of the pin
-   unsigned int group = target_pin.group; 
+   target_pin = get_group_and_index(pin);
+   unsigned int group = target_pin.group;
    unsigned int index = target_pin.pin_index;
-   volatile unsigned int *base_reg = get_data_reg(group);  //  get the base address of the data reg for the group
-   unsigned int targetval = *base_reg;  // read in the current state of the data reg for the group
+   volatile unsigned int *base_reg = get_data_reg(group);
+   unsigned int targetval = *base_reg;
    int bit_pos = index;
-   unsigned int shiftedfunction = (value << bit_pos); // shift the value to the left to align with the bit position of the pin
-   unsigned int shiftedpattern = ~ (0x1 << bit_pos);  // create a pattern to clear the bit for the pin
-   unsigned int results = (shiftedpattern & targetval) | shiftedfunction; //modify the results
-   *base_reg = results; // write back the updated state to the data reg for the group
+   unsigned int shiftedfunction = (value << bit_pos);
+   unsigned int shiftedpattern = ~ (0x1 << bit_pos);
+   unsigned int results = (shiftedpattern & targetval) | shiftedfunction;
+   *base_reg = results; 
    return;
 
 }
-// Function that reads the value of a pin configured as input.
+// Function that configures a pin to a selected function. 
 // ---------------------------------------------------------
+// Checks if the input pin is valid to continue
+// initialize the group and index of the input pin
+// establish the base address and adding the according index for 
+// the appropriate address
+// read in the current state for all pins in the cfg reg
+// modify the bits of interest by shfiting function to the left in bit_pos
+// write back the updated state 
 int gpio_read(gpio_id_t pin) {
-   if (gpio_id_is_valid(pin)== false){ // if the pin is invalid, do not continue and return
+   if (gpio_id_is_valid(pin)== false){
       return -1; 
    }   
    gpio_pin_t target_pin;
-   target_pin = get_group_and_index(pin); // get the group and index of the pin
+   target_pin = get_group_and_index(pin);
    unsigned int group = target_pin.group;
    unsigned int index = target_pin.pin_index;
-   volatile unsigned int *reg = get_data_reg(group); // get the address of the data reg for the group
+   volatile unsigned int *reg = get_data_reg(group); 
    int bit_pos = index;
-   unsigned int targetval = *reg;  // read in the current state of the data reg for the group
-   unsigned int shiftedpattern = (0x1 << bit_pos);  // create a pattern to isolate the bit for the pin
-   unsigned int results = shiftedpattern & targetval;  // isolate the bit for the pin
-   return (results>>bit_pos);  // shift the results to the right to get the bit value and return it
+   unsigned int targetval = *reg;
+   unsigned int shiftedpattern = (0x1 << bit_pos);
+   unsigned int results = shiftedpattern & targetval;
+   return (results>>bit_pos);
 }
+
