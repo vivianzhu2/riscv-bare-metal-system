@@ -35,8 +35,15 @@ void main(void) {
     }   
 
     // clock client app becomes simple loop that asks 7-segment to refresh current value
-    while (1) {        
-        display(DISPLAY_VALUE); // ask 7-segment to refresh current value
-    }  
+    unsigned int num = DISPLAY_VALUE; // set the initial value to be displayed on the 7-segment display
+    while (num > 0){
+        int digit1 = num/600;
+        int digit2 = (num / 60) % 10;
+        int digit3 = (num % 60) / 10;
+        int digit4 = (num % 60) % 10;
+        int time = digit1 *1000+digit2*100+digit3*10+digit4; // calculate the digits for the current time and store them in an array
+        display(time); // refresh the display with the current time for a short delay
+        num = num - 1;    
+  }
 }
 
