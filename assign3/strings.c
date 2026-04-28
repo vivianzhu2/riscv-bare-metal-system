@@ -82,7 +82,7 @@ size_t strlcat(char *dst, const char *src, size_t dstsize) {
     for(int i = strlen_dst; i< dstsize ; i++){
         if(i == dstsize - 1){
             *d = '\0';
-            return dstsize-1;
+            return (strlen_dst + strlen_src);
             //break;
         }
         *d = *s;
@@ -95,7 +95,7 @@ size_t strlcat(char *dst, const char *src, size_t dstsize) {
     }
     
    // *d ++ = '\0'; 
-    return dstsize; // return the total length of the string we tried to create
+    return strlen_dst + strlen_src; // return the total length of the string we tried to create
 
 
 }

@@ -1,1 +1,49 @@
-// Style reflection submitted with assign3
+1. Define a struct to represent the gpio registers and write the code for gpio_get_function that uses your struct. (copy and paste the code into style_reflection.txt)
+struct gpio_group{
+    uint32_t config[4]; 
+    uint32_t data;
+    uint32_t port[6];
+}
+
+unsigned int gpio_get_function(gpio_id_t pin) {
+   if (gpio_id_is_valid(pin)== false){
+      return -1;
+   }
+   struct gpio_group *dev = (struct gpio_pin *)0x1000;
+   gpio_pin_t target_pin;
+   target_pin = get_group_and_index(pin);
+   unsigned int group = target_pin.group;
+   unsigned int index = target_pin.pin_index;
+
+   dev->config = index;
+   dev->port = group;
+   volatile unsigned int *reg = get_cfg0_reg(dev->port) + dev->config / 8;
+   int bit_pos = (dev->config % 8) * 4;
+   unsigned int target_val = *reg;
+   unsigned int shiftedpattern = (0xf << bit_pos);
+   unsigned int results = shiftedpattern & target_val;
+   return (results>>bit_pos);
+}
+
+Tell us how you choose to represent time in your clock application. What is one task you think would have been easier had you chosen a different implementation and what is one task that you think your implementation made easy?
+In my clock application, I represented time by isolating each digit through math of converting the total number of seconds to the according time and put the numbers into an array to display. I think my implementation was easy to read as it was mostly separated into neat functions, so it was easier to understand. 
+Also, it is easy to change the display_refresh loop milliseconds. I think that my turnon segments function can be more concise, maybe combining the bottom two loops. 
+
+a. Review the issues posted against your gpio module. If you passed all tests (i.e. no issues posted) skip to 3b. Pick one of your gpio issues. Review the information in the posted issue and try to sort out the cause of the test failure. What do you think is missing in your testing that allowed this bug to slip past you? Write a test case you could add to test_gpio_timer.c that would detect this bug and could later be used to confirm your fix for the bug.
+
+
+In my gpio module issues, I realized I never included tests that would test if the function itself is valid when calling the gpio_set_output function. A test case I could include is: 
+    gpio_set_function(pin, 3);          //  valid function
+    assert(gpio_get_function(pin) == 3);
+
+    gpio_set_function(pin, 32);         // invalid function
+    assert(gpio_get_function(pin) == 3);
+}
+This way I can test and find out if the function is valid and invalid in order to proceed to set a value into it. 
+
+
+b. (optional if you answered 3a, but we recommend doing this anyways, it's a good one :D ). The strings and printf modules need to correctly read and write memory in all situations. It can be tricky to track down the bugs where these functions misbehave in their treatment of memory. Consider the provided test for the memset function. It confirms that memset wrote the value to the correct memory locations, but it does not also check that the function didn't write elsewhere.
+
+First tell us why we should care about verifying that memset is not writing anywhere besides where we told it to.
+
+Provide code for a test case that verifies that memset does not write anything into the 8 bytes before and after the memory we have designated it to write in.// Style reflection submitted with assign3

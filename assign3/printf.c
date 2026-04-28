@@ -117,40 +117,19 @@ void num_to_string(unsigned long num, int base, char *outstr) {
 
 int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
     /***** TODO: Your code goes here *****/
-    return 0;
-}
-// char* padding(char *src, int fw, char padchar){
-//     char* result = '\0';
-//     int npadding = 0;
-//     if( fw < strlen(src)){
-//         npadding = fw - strlen(src);
-//     }
-//     for( int i = 0; i<npadding +strlen(src); i++){
-//         if(i < npadding){
-//             result[i] = padchar;
-//         }
-//         else{
-//             result[i] = src[i - npadding];
-//         }
-        
-//     }
-
-// }
-
-
-int snprintf(char *buf, size_t bufsize, const char *format, ...) {
-    /***** TODO: Your code goes here *****/
     buf[0] = '\0'; // start with empty string in buffer
     // int length = 0;
     int exp_length = 0;
-    va_list ap; // declare va_list
+    // va_list ap; // declare va_list
     char temp[2] = "";
     char *new = temp;
     int fw = 0; 
     int k = 0;
     int has_width=0;
     char tempfw[32767];
-    va_start(ap, format); // init va_list, read arguments following argument named n
+    int overflow = 0;
+    int totallen= 0;
+    // va_start(args, format); // init va_list, read arguments following argument named n
     for(int i = 0; i<strlen(format); i++){
         if((format[i] == '%') && (i < strlen(format) - 1)){
             // loop through format for all the decimal digits until dont have any more numbers
@@ -178,15 +157,24 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                 new ++;
                 *new = '\0';
                 new--;
-                exp_length = strlcat(buf,new, bufsize);
-                if(exp_length > strlen(buf)){
-                    return exp_length;
+                if(bufsize <= (strlen(buf) + strlen(new))){
+                    exp_length = strlcat(buf,new, bufsize);
+                    if(overflow == 1){
+                        totallen += strlen(new);
+                    }
+                    else{
+                        totallen = exp_length;
+                    }
+                    overflow = 1;
                 }
-                
+                else{
+                    exp_length = strlcat(buf,new, bufsize);
+                    totallen = exp_length;
+                }
                 i++;
             }
             else if(format[i + 1] == 'c'){
-                char arg = (char)va_arg(ap, int);
+                char arg = (char)va_arg(args, int);
 
                 *new = arg;
                 new ++;
@@ -206,20 +194,48 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                         }
                     }  
                     result[npadding + strlen(new)] = '\0';
-                    exp_length = strlcat(buf,result, bufsize);
+                    new = result;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 else{
-                    exp_length = strlcat(buf,new, bufsize);
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
-                if(exp_length > strlen(buf)){
-                    return exp_length;
-                }
+                // if(exp_length > strlen(buf)){
+                //     return exp_length;
+                // }
                
                 i++;
 
             }
             else if(format[i + 1] == 's'){
-                char* arg = va_arg(ap, char*);
+                char* arg = va_arg(args, char*);
                 //new = arg;
                 char result[fw + 1];         
                 int npadding = 0;
@@ -234,18 +250,46 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                         }
                     } 
                     // result[npadding + strlen(arg)] = '\0'; 
-                    exp_length = strlcat(buf,result, bufsize);
+                    new = result;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                            // totallen = strlen(buf) + strlen(new);
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 else{
-                    exp_length = strlcat(buf,arg, bufsize);
-                }
-                if(exp_length > strlen(buf)){
-                    return exp_length;
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    new = arg;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                            // totallen = strlen(buf) + strlen(new);
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 i++;
             }
             else if(format[i + 1] == 'd'){
-                int arg = va_arg(ap, int);
+                int arg = va_arg(args, int);
                 const char* strarg = decimal_string(arg);
                 char result[fw + 1];         
                 int npadding = 0;
@@ -253,25 +297,51 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                     npadding = fw - strlen(strarg);
                     for( int j = 0; j<npadding +strlen(strarg); j++){
                         if(j < npadding){
-                            result[j] = '0';
+                            result[j] = ' ';
                         }
                         else{
                             result[j] = strarg[j - npadding];
                         }
                     } 
                     result[npadding + strlen(strarg)] = '\0'; 
-                    exp_length = strlcat(buf,result, bufsize);
+                    new = result;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 else{
-                    exp_length = strlcat(buf,strarg, bufsize);
-                }
-                if(exp_length > strlen(buf)){
-                    return exp_length;
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    //new = strarg;
+                    if(bufsize <= (strlen(buf) + strlen(strarg))){
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(strarg);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 i++;
             }
             else if(format[i + 1] == 'x'){
-                int arg = va_arg(ap, int);
+                int arg = va_arg(args, int);
 
                 const char* strarg = hex_string(arg);
                 char result[fw + 1];         
@@ -287,46 +357,108 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                         }
                     }  
                     result[npadding + strlen(strarg)] = '\0';
-                    exp_length = strlcat(buf,result, bufsize);
+                    new = result;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 else{
-                    exp_length = strlcat(buf,strarg, bufsize);
-                }
-                if(exp_length > strlen(buf)){
-                    return exp_length;
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    //new = strarg;
+                    if(bufsize <= (strlen(buf) + strlen(strarg))){
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(strarg);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 i++;
             }
             else if(format[i + 1] == 'p'){
-                unsigned long arg = va_arg(ap, unsigned long);
+                unsigned long arg = va_arg(args, unsigned long);
 
                 const char* strarg = hex_string(arg);
-                char result[9];         
+    
+                if (fw == 0){
+                    fw = 8;
+                }     
+                char result[100];
                 int npadding = 0;
-                if( 8 > strlen(strarg)){
-                    npadding = 8 - strlen(strarg);
-                    for( int j = 0; j<npadding +strlen(strarg); j++){
-                        if(j < npadding){
+                result[0] = '0';
+                result[1] = 'x';
+
+                if( fw > strlen(strarg)){
+                    npadding = fw - strlen(strarg);
+                    for( int j = 2; j<npadding +strlen(strarg) + 2; j++){
+                        if(j < npadding + 2){
                             result[j] = '0';
                         }
                         else{
-                            result[j] = strarg[j - npadding];
+                            result[j] = strarg[j - npadding - 2];
                         }
                     }  
-                    result[npadding + strlen(strarg)] = '\0';
-                    exp_length = strlcat(buf,result, bufsize);
+                    result[npadding + strlen(strarg) + 2] = '\0';
+                    new = result;
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
                 }
                 else{
-                    exp_length = strlcat(buf,strarg, bufsize);
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    //new = strarg;
+                    if(bufsize <= (strlen(buf) + strlen(strarg))){
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(strarg);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+                        exp_length = strlcat(buf,strarg, bufsize);
+                        totallen = exp_length;
+                    }
                 }
-                if(exp_length > strlen(buf)){
-                    return exp_length;
-                }
+                // if(exp_length > strlen(buf)){
+                //     return exp_length;
+                // }
                 i++;
             }
             else if(i <strlen(format) - 2){
                 if(format[i + 1] == 'l' && format[i+2] == 'd'){
-                    long arg = va_arg(ap, long);
+                    long arg = va_arg(args, long);
                     const char* strarg = decimal_string(arg);
                     char result[fw + 1];         
                     int npadding = 0;
@@ -334,26 +466,55 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                         npadding = fw - strlen(strarg);
                         for( int j = 0; j<npadding +strlen(strarg); j++){
                             if(j < npadding){
-                                result[j] = '0';
+                                result[j] = ' ';
                             }
                             else{
                                 result[j] = strarg[j - npadding];
                             }
                         }  
                         result[npadding + strlen(strarg)] = '\0';
-                        exp_length = strlcat(buf,result, bufsize);
+                        new = result;
+                        if(bufsize <= (strlen(buf) + strlen(new))){
+                            exp_length = strlcat(buf,new, bufsize);
+                            if(overflow == 1){
+                                totallen += strlen(new);
+                            }
+                            else{
+                                totallen = exp_length;
+                            }
+                            overflow = 1;
+                        }
+                        else{
+                            exp_length = strlcat(buf,new, bufsize);
+                            totallen = exp_length;
+                        }
                     }
                     else{
-                        result[npadding + strlen(strarg)] = '\0';
-                        exp_length = strlcat(buf,strarg, bufsize);
+                        // exp_length = strlcat(buf,strarg, bufsize);
+                        // new = strarg;
+                        if(bufsize <= (strlen(buf) + strlen(strarg))){
+                            exp_length = strlcat(buf,strarg, bufsize);
+                            if(overflow == 1){
+                                totallen += strlen(strarg);
+                            }
+                            else{
+                                totallen = exp_length;
+                            }
+                            overflow = 1;
+                        }
+                        else{
+                            exp_length = strlcat(buf,strarg, bufsize);
+                            totallen = exp_length;
+                        }
                     }
-                    if(exp_length > strlen(buf)){
-                        return exp_length;
-                    }
+                    // if(exp_length > strlen(buf)){
+                    //     return exp_length;
+                    // }
+                    
                     i+=2;
                 }
                 if(format[i + 1] == 'l' && format[i+2] == 'x'){
-                    unsigned long arg = va_arg(ap, unsigned long);
+                    unsigned long arg = va_arg(args, unsigned long);
                     const char* strarg = hex_string(arg);
                     char result[fw + 1];         
                     int npadding = 0;
@@ -368,15 +529,45 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
                             }
                         }  
                         result[npadding + strlen(strarg)] = '\0';
-                        exp_length = strlcat(buf,result, bufsize);
+                        // exp_length = strlcat(buf,result, bufsize); 
+                        new = result;
+                        if(bufsize <= (strlen(buf) + strlen(new))){
+                            exp_length = strlcat(buf,new, bufsize);
+                            if(overflow == 1){
+                                totallen += strlen(new);
+                            }
+                            else{
+                                totallen = exp_length;
+                            }
+                            overflow = 1;
+                        }
+                        else{
+                            exp_length = strlcat(buf,new, bufsize);
+                            totallen = exp_length;
+                        }
                     }
                     else{
-                        exp_length = strlcat(buf,strarg, bufsize);
+                        // exp_length = strlcat(buf,strarg, bufsize);
+                        // new = strarg;
+                        if(bufsize <= (strlen(buf) + strlen(strarg))){
+                            exp_length = strlcat(buf,strarg, bufsize);
+                            if(overflow == 1){
+                                totallen += strlen(strarg);
+                            }
+                            else{
+                                totallen = exp_length;
+                            }
+                            overflow = 1;
+                        }
+                        else{
+                            exp_length = strlcat(buf,strarg, bufsize);
+                            totallen = exp_length;
+                        }
                     }
-
-                    if(exp_length > strlen(buf)){
-                        return exp_length;
-                    }
+                    // totallen+= exp_length;
+                    // if(exp_length > strlen(buf)){
+                    //     return exp_length;
+                    // }
                     i+=2;
                 }
             }
@@ -392,34 +583,324 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
             new++;
             *new = '\0';
             new--;
-            exp_length = strlcat(buf,new, bufsize);
-            if(exp_length > strlen(buf)){
-                return exp_length;
+
+
+            if(bufsize <= (strlen(buf) + strlen(new))){
+                exp_length = strlcat(buf,new, bufsize);
+                if(overflow == 1){
+                    totallen += strlen(new);
+                }
+                else{
+                    totallen = exp_length;
+                }
+                overflow = 1;
             }
+            else{
+                exp_length = strlcat(buf,new, bufsize);
+                totallen = exp_length;
+            }
+            
+            // if(totallen > strlen(buf)){
+            //     return totallen;
+            // }
         }
 
     }
     
+    // va_end(args);
+    return  totallen;
+
+
+}
+
+
+int snprintf(char *buf, size_t bufsize, const char *format, ...) {
+    va_list ap;
+    va_start(ap, format);
+    int result = vsnprintf(buf, bufsize, format, ap);
     va_end(ap);
-    return  exp_length;
-
-
+    return result;
+    // /***** TODO: Your code goes here *****/
+    // buf[0] = '\0'; // start with empty string in buffer
+    // // int length = 0;
+    // int exp_length = 0;
     // va_list ap; // declare va_list
+    // char temp[2] = "";
+    // char *new = temp;
+    // int fw = 0; 
+    // int k = 0;
+    // int has_width=0;
+    // char tempfw[32767];
+    // va_start(ap, format); // init va_list, read arguments following argument named n
+    // for(int i = 0; i<strlen(format); i++){
+    //     if((format[i] == '%') && (i < strlen(format) - 1)){
+    //         // loop through format for all the decimal digits until dont have any more numbers
+    //         // save that integer
+    //         // function for padding
+    //         // function for truncating
+    //         k= i + 1;
+    //         while(format[k] >= '0' && format[k] <= '9'){
+    //             tempfw[k - i - 1] = format[k];
+    //             k++;
+    //             has_width=1;
+                
+    //         }
+    //         i = k-1;
+    //         if (has_width==1) {
+    //             tempfw[k] = '\0';
+    //             fw = strtonum(tempfw, NULL);
+    //         }
+    //         else {
+    //             fw=0;
+    //         }
 
-    // va_start(ap, n); // init va_list, read arguments following argument named n
-    // for (int i = 0; i < n; i++) {
-    //    int arg = va_arg(ap, int); // access value of next argument, type is `int`
-    //    result += arg;
-    // }
-    // va_end(ap);   // clean up
+    //         if(format[i + 1] == '%'){
+    //             *new = '%';
+    //             new ++;
+    //             *new = '\0';
+    //             new--;
+    //             exp_length = strlcat(buf,new, bufsize);
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+                
+    //             i++;
+    //         }
+    //         else if(format[i + 1] == 'c'){
+    //             char arg = (char)va_arg(ap, int);
 
+    //             *new = arg;
+    //             new ++;
+    //             *new = '\0';
+    //             new--;
+    //             char result[fw+1];  
+    //             // result[0] = '\0';       
+    //             int npadding = 0;
+    //             if( fw > strlen(new)){
+    //                 npadding = fw - strlen(new);
+    //                 for( int j = 0; j<npadding +strlen(new); j++){
+    //                     if(j < npadding){
+    //                         result[j] = ' ';
+    //                     }
+    //                     else{
+    //                         result[j] = new[j - npadding];
+    //                     }
+    //                 }  
+    //                 result[npadding + strlen(new)] = '\0';
+    //                 exp_length = strlcat(buf,result, bufsize);
+    //             }
+    //             else{
+    //                 exp_length = strlcat(buf,new, bufsize);
+    //             }
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+               
+    //             i++;
 
+    //         }
+    //         else if(format[i + 1] == 's'){
+    //             char* arg = va_arg(ap, char*);
+    //             //new = arg;
+    //             char result[fw + 1];         
+    //             int npadding = 0;
+    //             if( fw > strlen(arg)){
+    //                 npadding = fw - strlen(arg);
+    //                 for( int j = 0; j<npadding +strlen(arg); j++){
+    //                     if(j < npadding){
+    //                         result[j] = ' ';
+    //                     }
+    //                     else{
+    //                         result[j] = arg[j - npadding];
+    //                     }
+    //                 } 
+    //                 // result[npadding + strlen(arg)] = '\0'; 
+    //                 exp_length = strlcat(buf,result, bufsize);
+    //             }
+    //             else{
+    //                 exp_length = strlcat(buf,arg, bufsize);
+    //             }
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+    //             i++;
+    //         }
+    //         else if(format[i + 1] == 'd'){
+    //             int arg = va_arg(ap, int);
+    //             const char* strarg = decimal_string(arg);
+    //             char result[fw + 1];         
+    //             int npadding = 0;
+    //             if( fw > strlen(strarg)){
+    //                 npadding = fw - strlen(strarg);
+    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
+    //                     if(j < npadding){
+    //                         result[j] = '0';
+    //                     }
+    //                     else{
+    //                         result[j] = strarg[j - npadding];
+    //                     }
+    //                 } 
+    //                 result[npadding + strlen(strarg)] = '\0'; 
+    //                 exp_length = strlcat(buf,result, bufsize);
+    //             }
+    //             else{
+    //                 exp_length = strlcat(buf,strarg, bufsize);
+    //             }
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+    //             i++;
+    //         }
+    //         else if(format[i + 1] == 'x'){
+    //             int arg = va_arg(ap, int);
 
-    // if(format[1] == '%' && ap == '%'){
+    //             const char* strarg = hex_string(arg);
+    //             char result[fw + 1];         
+    //             int npadding = 0;
+    //             if( fw > strlen(strarg)){
+    //                 npadding = fw - strlen(strarg);
+    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
+    //                     if(j < npadding){
+    //                         result[j] = '0';
+    //                     }
+    //                     else{
+    //                         result[j] = strarg[j - npadding];
+    //                     }
+    //                 }  
+    //                 result[npadding + strlen(strarg)] = '\0';
+    //                 exp_length = strlcat(buf,result, bufsize);
+    //             }
+    //             else{
+    //                 exp_length = strlcat(buf,strarg, bufsize);
+    //             }
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+    //             i++;
+    //         }
+    //         else if(format[i + 1] == 'p'){
+    //             unsigned long arg = va_arg(ap, unsigned long);
+
+    //             const char* strarg = hex_string(arg);
+    //             char result[9];         
+    //             int npadding = 0;
+    //             if( 8 > strlen(strarg)){
+    //                 npadding = 8 - strlen(strarg);
+    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
+    //                     if(j < npadding){
+    //                         result[j] = '0';
+    //                     }
+    //                     else{
+    //                         result[j] = strarg[j - npadding];
+    //                     }
+    //                 }  
+    //                 result[npadding + strlen(strarg)] = '\0';
+    //                 exp_length = strlcat(buf,result, bufsize);
+    //             }
+    //             else{
+    //                 exp_length = strlcat(buf,strarg, bufsize);
+    //             }
+    //             if(exp_length > strlen(buf)){
+    //                 return exp_length;
+    //             }
+    //             i++;
+    //         }
+    //         else if(i <strlen(format) - 2){
+    //             if(format[i + 1] == 'l' && format[i+2] == 'd'){
+    //                 long arg = va_arg(ap, long);
+    //                 const char* strarg = decimal_string(arg);
+    //                 char result[fw + 1];         
+    //                 int npadding = 0;
+    //                 if( fw > strlen(strarg)){
+    //                     npadding = fw - strlen(strarg);
+    //                     for( int j = 0; j<npadding +strlen(strarg); j++){
+    //                         if(j < npadding){
+    //                             result[j] = '0';
+    //                         }
+    //                         else{
+    //                             result[j] = strarg[j - npadding];
+    //                         }
+    //                     }  
+    //                     result[npadding + strlen(strarg)] = '\0';
+    //                     exp_length = strlcat(buf,result, bufsize);
+    //                 }
+    //                 else{
+    //                     result[npadding + strlen(strarg)] = '\0';
+    //                     exp_length = strlcat(buf,strarg, bufsize);
+    //                 }
+    //                 if(exp_length > strlen(buf)){
+    //                     return exp_length;
+    //                 }
+    //                 i+=2;
+    //             }
+    //             if(format[i + 1] == 'l' && format[i+2] == 'x'){
+    //                 unsigned long arg = va_arg(ap, unsigned long);
+    //                 const char* strarg = hex_string(arg);
+    //                 char result[fw + 1];         
+    //                 int npadding = 0;
+    //                 if( fw > strlen(strarg)){
+    //                     npadding = fw - strlen(strarg);
+    //                     for( int j = 0; j<npadding +strlen(strarg); j++){
+    //                         if(j < npadding){
+    //                             result[j] = '0';
+    //                         }
+    //                         else{
+    //                             result[j] = strarg[j - npadding];
+    //                         }
+    //                     }  
+    //                     result[npadding + strlen(strarg)] = '\0';
+    //                     exp_length = strlcat(buf,result, bufsize);
+    //                 }
+    //                 else{
+    //                     exp_length = strlcat(buf,strarg, bufsize);
+    //                 }
+
+    //                 if(exp_length > strlen(buf)){
+    //                     return exp_length;
+    //                 }
+    //                 i+=2;
+    //             }
+    //         }
+
+    //         else{
+
+    //             break;
+    //         }
+
+    //     }
+    //     else{
+    //         *new = format[i];
+    //         new++;
+    //         *new = '\0';
+    //         new--;
+    //         exp_length = strlcat(buf,new, bufsize);
+    //         if(exp_length > strlen(buf)){
+    //             return exp_length;
+    //         }
+    //     }
 
     // }
     
-    // return (int)strlcat(buf, format, bufsize);
+    // va_end(ap);
+    // return  exp_length;
+
+
+    // // va_list ap; // declare va_list
+
+    // // va_start(ap, n); // init va_list, read arguments following argument named n
+    // // for (int i = 0; i < n; i++) {
+    // //    int arg = va_arg(ap, int); // access value of next argument, type is `int`
+    // //    result += arg;
+    // // }
+    // // va_end(ap);   // clean up
+
+
+
+    // // if(format[1] == '%' && ap == '%'){
+
+    // // }
+    
+    // // return (int)strlcat(buf, format, bufsize);
 
    
 }
@@ -427,5 +908,12 @@ int snprintf(char *buf, size_t bufsize, const char *format, ...) {
 int printf(const char *format, ...) {
     const int MAX_OUTPUT_LEN = 1024; // ok to assume printf output never longer than this
     /***** TODO: Your code goes here *****/
-    return 0;
+    char buf[MAX_OUTPUT_LEN];
+    int bufsize = MAX_OUTPUT_LEN;
+
+    va_list ap;
+    va_start(ap, format);
+    int result = vsnprintf(buf, bufsize, format, ap);
+    va_end(ap);
+    return result;
 }

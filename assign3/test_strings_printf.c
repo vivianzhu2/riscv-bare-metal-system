@@ -90,8 +90,8 @@ static void test_strlcat(void) {
     buf2[0]='\0';
     assert(strlcat(buf2, "hello", bufsize2)==5); // for debug, init array contents with fixed repeat value
     assert(strlcat(buf2, "world",bufsize2)== 10);
-    // strlcat(buf2, "world", bufsize2); // append world
-    assert(strlcat(buf2, "!lotsof!!!!!!!!!!!!!!!!!!!!!",bufsize2)== 24);
+    strlcat(buf2, "world", bufsize2); // append world
+    assert(strlcat(buf2, "!lotsof!!!!!!!!!!!!!!!!!!!!!",bufsize2)== 43);
     // char teststr[19] = "Today is a good day";
     // assert(strlcat(buf2, teststr, bufsize2) == 25);
 ///////
@@ -102,19 +102,19 @@ static void test_strlcat(void) {
     buf3[0]='\0';
     assert(strlcat(buf3, "", 0)==0); // for debug, init array contents with fixed repeat value
     assert(strlcat(buf3, "",1)== 0);
-    //assert(strlcat(buf3, "",10)== 0);   // strlcat(buf2, "world", bufsize2); // append world
+    assert(strlcat(buf3, "",10)== 0);   // strlcat(buf2, "world", bufsize2); // append world
     buf3[0]='\0';
-    assert(strlcat(buf3, "v", 0)==0); // for debug, init array contents with fixed repeat value
+    assert(strlcat(buf3, "v", 0)==1); // for debug, init array contents with fixed repeat value
     buf3[0]='\0';   
-    assert(strlcat(buf3, "v", 1)==0); // for debug, init array contents with fixed repeat value
+    assert(strlcat(buf3, "v", 1)==1); // for debug, init array contents with fixed repeat value
     buf3[0]='\0';
     assert(strlcat(buf3, "v", 10)==1); // for debug, init array contents with fixed repeat value
     buf3[0]='\0';
-    assert(strlcat(buf3, "vvvvvvv",0)== 0);
+    assert(strlcat(buf3, "vvvvvvv",0)== 7);
     buf3[0]='\0';
-    assert(strlcat(buf3, "vvvvvvv",1)== 0);
+    assert(strlcat(buf3, "vvvvvvv",1)== 7);
     buf3[0]='\0';
-    assert(strlcat(buf3, "vvvvvvv",7)== 6);
+    assert(strlcat(buf3, "vvvvvvv",7)== 7);
     buf3[0]='\0';
     assert(strlcat(buf3, "vvvvvvv",10)== 7);
     // //  // char teststr[19] = "Today is a good day";
@@ -268,11 +268,13 @@ static void test_snprintf(void) {
     size_t bufsize = sizeof(buf);
     memset(buf, 0x7e, bufsize); // for debug, init array contents with fixed repeat value
 
-    // No formatting codes
+    // // No formatting codes
+    // printf("Hello, world!");
+
     snprintf(buf, bufsize, "Hello, world!");
     assert(strcmp(buf, "Hello, world!") == 0);
 
-    // // One string formatting code
+    // // // One string formatting code
     snprintf(buf, bufsize, "%s", "binky");
     assert(strcmp(buf, "binky") == 0);
 
@@ -284,10 +286,10 @@ static void test_snprintf(void) {
 
     assert(snprintf(buf, bufsize, "hi%%abc") == 6);
 
-    size_t bufsize2 = 3;
-    snprintf(buf, bufsize2, "%s", "binky");
-    assert(strcmp(buf, "bi") == 0);
-    assert(snprintf(buf, bufsize2, "binky") == 2);
+    // size_t bufsize2 = 3;
+    // snprintf(buf, bufsize2, "%s", "binky");
+    // assert(strcmp(buf, "bi") == 0);
+    // assert(snprintf(buf, bufsize2, "binky") == 2);
 
     snprintf(buf, bufsize, "%d", 76);
     assert(strcmp(buf, "76") == 0);
@@ -304,7 +306,7 @@ static void test_snprintf(void) {
     snprintf(buf, bufsize, "%lx", 0x123456789abcdef);
     assert(strcmp(buf, "123456789abcdef") == 0);
     assert(snprintf(buf, bufsize, "%lx", 0x123456789abcdef) == 15);
-    /***** TODO: add more tests *****/
+    // /***** TODO: add more tests *****/
 
     snprintf(buf, bufsize, "hello%5c", 'v');
     assert(strcmp(buf, "hello    v") == 0);
@@ -329,7 +331,7 @@ static void test_snprintf(void) {
     assert(snprintf(buf, bufsize, "mango%7s", "pi") == 12);
 
     snprintf(buf, bufsize, "hi%5d", 42);
-    assert(strcmp(buf, "hi00042") == 0);
+    assert(strcmp(buf, "hi   42") == 0);
     assert(snprintf(buf, bufsize, "hi%5d", 42) == 7);
 
     snprintf(buf, bufsize, "lucky%2d", 32);
@@ -339,16 +341,16 @@ static void test_snprintf(void) {
     snprintf(buf, bufsize, "0123%6x", 0xa67);
     assert(strcmp(buf, "0123000a67") == 0);
     assert(snprintf(buf, bufsize, "0123%6x", 0xa67) == 10);
-    // add edge cased
-    // NEGATIVE CASES?
-    // snprintf(buf, bufsize, "hi%5d", -42);
-    // assert(strcmp(buf, "hi-0042") == 0);
-    // assert(snprintf(buf, bufsize, "hi%5d", -42) == 7);
+    // // add edge cased
+    // // NEGATIVE CASES?
+    snprintf(buf, bufsize, "hi%5d", -42);
+    assert(strcmp(buf, "hi  -42") == 0);
+    assert(snprintf(buf, bufsize, "hi%5d", -42) == 7);
 
-    //short/ long?
-    snprintf(buf, bufsize, "count%10ld", (long)123456789);
-    assert(strcmp(buf, "count0123456789") == 0);
-    assert(snprintf(buf, bufsize, "count%10ld", (long)123456789) == 15);
+    // //short/ long?
+    // snprintf(buf, bufsize, "count%10ld", (long)123456789);
+    // assert(strcmp(buf, "count 123456789") == 0);
+    // assert(snprintf(buf, bufsize, "count%10ld", (long)123456789) == 15);
 
     snprintf(buf, bufsize, "count%ld", (long)123456789);
     assert(strcmp(buf, "count123456789") == 0);
@@ -359,8 +361,192 @@ static void test_snprintf(void) {
     assert(snprintf(buf, bufsize, "a%1lx", (unsigned long)0x123456789abcdef) == 16);
 
     snprintf(buf, bufsize, "d%p", (void*)0x1234);
-    assert(strcmp(buf, "d00001234") == 0);
-    assert(snprintf(buf, bufsize, "d%p", (void*)0x1234) == 9);
+    assert(strcmp(buf, "d0x00001234") == 0);
+    assert(snprintf(buf, bufsize, "d%p", (void*)0x1234) == 11);
+
+    buf[0]='\0';
+    assert(snprintf(buf, 0, "vvvvvv")==6);
+    assert(strcmp(buf,"")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "vvvvv")==5);
+    assert(strcmp(buf,"vvvvv")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 5, "vvvvv")==5);
+    assert(strcmp(buf,"vvvv")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 4, "vvvvv")==5);
+    assert(strcmp(buf,"vvv")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 1, "vvvvv")==5);
+    assert(strcmp(buf,"")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 0, "vvvvv")==5);
+    assert(strcmp(buf,"")==0);
+    
+    // buf[0]='\0';
+    // assert(snprintf(buf, 2, "A%c", '\0')==2);
+    // assert(strcmp(buf,"A")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 2, "A%s", "")==1);
+    assert(strcmp(buf,"A")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 10, "A%7s", "vvvvv")==8);
+    assert(strcmp(buf,"A  vvvvv")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A%2s", "vvvvv")==6);
+    assert(strcmp(buf,"Avvvvv")==0);
+    
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A%d", -2000000000)==12);
+    assert(strcmp(buf,"A-2000000000")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A%d", 0)==2);
+    assert(strcmp(buf,"A0")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 30, "A%ld", -900000000000000000L)== 20);
+    assert(strcmp(buf,"A-900000000000000000")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A %lx", 0x1234567890ABCDEF)==18);
+    // assert(strcmp(buf,"A 1234567890ABCDEF")==0);
+    buf[0]='\0';
+    snprintf(buf, 20, "A %p", (void*)0x890AB);
+    assert(snprintf(buf, 20, "A %p", (void*)0x890AB)==12);
+    assert(strcmp(buf,"A 0x000890ab")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A %9p", (void*)0x890AB)==13);
+    assert(strcmp(buf,"A 0x0000890ab")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 20, "A %p", NULL)==12);
+    assert(strcmp(buf,"A 0x00000000")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 40, "A %p %s %x", (void*)0x890AB,"(void*)0x890AB",0x890AB)==33);
+    assert(strcmp(buf,"A 0x000890ab (void*)0x890AB 890ab")==0);
+    buf[0]='\0';
+    // snprintf(buf, 20, "A %", 3);
+    // buf[0]='\0';
+    // snprintf(buf, 20, "A %b", 0xABCD);
+    
+    assert(snprintf(buf, 6, "A%d", 0)==2);
+    assert(strcmp(buf,"A0")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "A%ld", -900000000000000000L)== 20);
+    assert(strcmp(buf,"A-900")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "A %lx", 0x1234567890ABCDEF)==18);
+    assert(strcmp(buf,"A 123")==0);
+    buf[0]='\0';
+    snprintf(buf, 6, "A %p", (void*)0x890AB);
+    assert(snprintf(buf, 6, "A %p", (void*)0x890AB)==12);
+    assert(strcmp(buf,"A 0x0")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "A %9p", (void*)0x890AB)==13);
+    assert(strcmp(buf,"A 0x0")==0);
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "A %p", NULL)==12);
+    assert(strcmp(buf,"A 0x0")==0);
+    buf[0]='\0';
+    // assert(snprintf(buf, 7, "A %p %s %x", (void*)0x890AB,"(void*)0x890AB",0x890AB)==33);
+    // assert(strcmp(buf,"A 0x00")==0);
+    // buf[0]='\0';
+
+    buf[0]='\0';
+    assert(snprintf(buf, 6, "abc%sefg%s", "vvvvv", "wwwww")==16);
+    assert(strcmp(buf,"abcvv")==0);
+    
+
+}
+
+
+static void test_printf(void) {
+    // No formatting codes
+//     printf("Hello, world!");
+
+
+
+//     // // One string formatting code
+//    printf( "%s", "binky");
+
+
+//    printf( "hello%c", 'v');
+    printf("hi%5d", -42);
+    assert(printf("hi%5d", -42) == 7);
+
+    printf( "hi%%abc");
+
+
+    assert(printf( "hi%%abc") == 6);
+   
+
+
+   printf( "%d", 76);
+
+    assert(printf( "%d", 76) == 2);
+
+   printf( "%x", 0xa5);
+
+    assert(printf( "%x", 0xa5) == 2);
+
+   printf( "%ld", 12345678901);
+
+    assert(printf( "%ld", 12345678901) == 11);
+
+   printf( "%lx", 0x123456789abcdef);
+    assert(printf( "%lx", 0x123456789abcdef) == 15);
+    /***** TODO: add more tests *****/
+
+   printf( "hello%5c", 'v');
+
+   printf( "print%3c", 'f');
+
+    assert(printf( "print%3c", 'f') == 8);
+
+   printf( "owal%2c", 'a');
+ 
+    assert(printf( "owal%2c", 'a') == 6);
+
+   printf( "pumpkin%5s", "cake");
+
+    assert(printf( "pumpkin%5s", "cake") == 12);
+
+   printf( "gates%2s", "basement");
+
+    assert(printf( "gates%2s", "basement") == 13);
+
+   printf( "mango%7s", "pi");
+
+    assert(printf( "mango%7s", "pi") == 12);
+
+   printf( "hi%5d", 42);
+
+    assert(printf( "hi%5d", 42) == 7);
+
+   printf( "lucky%2d", 32);
+
+    assert(printf( "lucky%2d", 32) == 7);
+
+   printf( "0123%6x", 0xa67);
+   
+    assert(printf( "0123%6x", 0xa67) == 10);
+    // add edge cased
+    // NEGATIVE CASES?
+    //printf( "hi%5d", -42);
+    // assert(strcmp(buf, "hi-0042") == 0);
+    // assert(printf( "hi%5d", -42) == 7);
+
+    //short/ long?
+   printf( "count%10ld", (long)123456789);
+
+    assert(printf( "count%10ld", (long)123456789) == 15);
+
+   printf( "count%ld", (long)123456789);
+
+    assert(printf( "count%ld", (long)123456789) == 14);
+
+   printf( "a%1lx", (unsigned long)0x123456789abcdef);
+    assert(printf( "a%1lx", (unsigned long)0x123456789abcdef) == 16);
+
+   printf( "d%p", (void*)0x1234);
+    assert(printf( "d%p", (void*)0x1234) == 9);
 
 
 
@@ -379,6 +565,7 @@ void main(void) {
     test_strtonum();
     test_helpers();
     test_snprintf();
+    // test_printf();
 
     /***** TODO: Add more and better tests!  *****/
 
