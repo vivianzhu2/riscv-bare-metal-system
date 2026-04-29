@@ -9,7 +9,7 @@ unsigned int gpio_get_function(gpio_id_t pin) {
    if (gpio_id_is_valid(pin)== false){
       return -1;
    }
-   struct gpio_group *dev = (struct gpio_pin *)0x1000;
+   struct gpio_group *dev = (struct gpio_pin *)0x20000000;
    gpio_pin_t target_pin;
    target_pin = get_group_and_index(pin);
    unsigned int group = target_pin.group;
