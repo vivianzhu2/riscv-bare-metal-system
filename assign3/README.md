@@ -1,2 +1,2 @@
 Finished the printf module and style reflection. Worked through the string functions and applied them to the snprint f, then refactored into vsnprintf, and then called from printf yay!
-
+Edit: Added an extension. The code is copied into the printf.c with extension right now so it is easier to test, but original print f code is in printfcommentsmain.c. The extension code is also in extension.c! Extension adds the function to do negative padding and use the * toaddress the next parameter in vsnprintf. 
