@@ -1,29 +1,29 @@
 1. Define a struct to represent the gpio registers and write the code for gpio_get_function that uses your struct. (copy and paste the code into style_reflection.txt)
-struct gpio_group{
-    uint32_t config[4]; 
-    uint32_t data;
-    uint32_t port[6];
-}
+struct gpio_group  {
+   unsigned int config[4]; 
+   unsigned int data;
+};
 
 unsigned int gpio_get_function(gpio_id_t pin) {
-   if (gpio_id_is_valid(pin)== false){
-      return -1;
-   }
-   struct gpio_group *dev = (struct gpio_pin *)0x20000000;
-   gpio_pin_t target_pin;
-   target_pin = get_group_and_index(pin);
-   unsigned int group = target_pin.group;
-   unsigned int index = target_pin.pin_index;
+  if (gpio_id_is_valid(pin)== false){
+     return -1;
+  }
+ 
+  gpio_pin_t target_pin;
+  target_pin = get_group_and_index(pin);
+  unsigned int group = target_pin.group;
+  unsigned int index = target_pin.pin_index;
+  volatile struct gpio_group *gp = (struct gpio_group *)get_cfg0_reg(group);
+  unsigned int config_val = gp->config[index / 8];
 
-   dev->config = index;
-   dev->port = group;
-   volatile unsigned int *reg = get_cfg0_reg(dev->port) + dev->config / 8;
-   int bit_pos = (dev->config % 8) * 4;
-   unsigned int target_val = *reg;
-   unsigned int shiftedpattern = (0xf << bit_pos);
-   unsigned int results = shiftedpattern & target_val;
-   return (results>>bit_pos);
+  
+  int bit_pos = (index % 8) * 4;
+  unsigned int shiftedpattern = (0xf << bit_pos);
+  unsigned int results = shiftedpattern & config_val;
+  return (results>>bit_pos);
+
 }
+
 
 Tell us how you choose to represent time in your clock application. What is one task you think would have been easier had you chosen a different implementation and what is one task that you think your implementation made easy?
 In my clock application, I represented time by isolating each digit through math of converting the total number of seconds to the according time and put the numbers into an array to display. I think my implementation was easy to read as it was mostly separated into neat functions, so it was easier to understand. 

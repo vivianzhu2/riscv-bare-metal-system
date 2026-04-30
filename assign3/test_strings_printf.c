@@ -454,6 +454,103 @@ static void test_snprintf(void) {
     assert(strcmp(buf,"abcvv")==0);
     
 
+    // snprintf(buf, bufsize, "hello%-5c", 'v');
+    // assert(strcmp(buf, "hellov    ") == 0);
+    // snprintf(buf, bufsize, "print%-3c", 'f');
+    // assert(strcmp(buf, "printf  ") == 0);
+    // assert(snprintf(buf, bufsize, "print%3c", 'f') == 8);
+
+    // snprintf(buf, bufsize, "owal%-2c", 'a');
+    // assert(strcmp(buf, "owala ") == 0);
+    // assert(snprintf(buf, bufsize, "owal%2c", 'a') == 6);
+
+
+    // snprintf(buf, bufsize, "pumpkin%-5s", "cake");
+    // assert(strcmp(buf, "pumpkincake ") == 0);
+    // assert(snprintf(buf, bufsize, "pumpkin%-5s", "cake") == 12);
+
+    // snprintf(buf, bufsize, "gates%-2s", "basement");
+    // assert(strcmp(buf, "gatesbasement") == 0);
+    // assert(snprintf(buf, bufsize, "gates%-2s", "basement") == 13);
+
+    // snprintf(buf, bufsize, "mango%-7s", "pi");
+    // assert(strcmp(buf, "mangopi     ") == 0);
+    // assert(snprintf(buf, bufsize, "mango%-7s", "pi") == 12);
+
+    // snprintf(buf, bufsize, "hi%-5d", 42);
+    // assert(strcmp(buf, "hi42   ") == 0);
+    // assert(snprintf(buf, bufsize, "hi%-5d", 42) == 7);
+
+    // snprintf(buf, bufsize, "lucky%-2d", 32);
+    // assert(strcmp(buf, "lucky32") == 0);
+    // assert(snprintf(buf, bufsize, "lucky%-2d", 32) == 7);
+
+    // snprintf(buf, bufsize, "0123%-6x", 0xa67);
+    // assert(strcmp(buf, "0123a67000") == 0);
+    // assert(snprintf(buf, bufsize, "0123%-6x", 0xa67) == 10);
+    // // // add edge cased
+    // // // NEGATIVE CASES?
+    // snprintf(buf, bufsize, "hi%-5d", -42);
+    // assert(strcmp(buf, "hi-42  ") == 0);
+    // assert(snprintf(buf, bufsize, "hi%-5d", -42) == 7);
+
+    // buf[0]='\0';
+    // assert(snprintf(buf, 6, "A %-9p", (void*)0x890AB)==13);
+    // assert(strcmp(buf,"A 0x8")==0);
+
+    // buf[0]='\0';
+    // assert(snprintf(buf, 20, "A %-9p", (void*)0x890AB)==13);
+    // assert(strcmp(buf,"A 0x890ab0000")==0);
+
+
+
+    // snprintf(buf, bufsize, "hello%*c", -5, 'v');
+    // assert(strcmp(buf, "hellov    ") == 0);
+    // snprintf(buf, bufsize, "print%*c", -3, 'f');
+    // assert(strcmp(buf, "printf  ") == 0);
+    // assert(snprintf(buf, bufsize, "print%3c", 'f') == 8);
+
+    // snprintf(buf, bufsize, "owal%*c",2, 'a');
+    // assert(strcmp(buf, "owal a") == 0);
+    // assert(snprintf(buf, bufsize, "owal%*c",2, 'a') == 6);
+
+
+    // snprintf(buf, bufsize, "pumpkin%*s", 5, "cake");
+    // assert(strcmp(buf, "pumpkin cake") == 0);
+    // assert(snprintf(buf, bufsize, "pumpkin%*s", 5, "cake") == 12);
+
+    // snprintf(buf, bufsize, "gates%*s", -2, "basement");
+    // assert(strcmp(buf, "gatesbasement") == 0);
+    // assert(snprintf(buf, bufsize, "gates%*s",-2, "basement") == 13);
+
+    // snprintf(buf, bufsize, "mango%*s", -7, "pi");
+    // assert(strcmp(buf, "mangopi     ") == 0);
+    // assert(snprintf(buf, bufsize, "mango%*s",-7, "pi") == 12);
+
+    // snprintf(buf, bufsize, "hi%*d", -5, 42);
+    // assert(strcmp(buf, "hi42   ") == 0);
+    // assert(snprintf(buf, bufsize, "hi%*d",-5, 42) == 7);
+
+    // snprintf(buf, bufsize, "lucky%*d", 2, 32);
+    // assert(strcmp(buf, "lucky32") == 0);
+    // assert(snprintf(buf, bufsize, "lucky%*d",-2, 32) == 7);
+
+    // snprintf(buf, bufsize, "0123%*x", -6, 0xa67);
+    // assert(strcmp(buf, "0123a67000") == 0);
+    // assert(snprintf(buf, bufsize, "0123%*x", -6, 0xa67) == 10);
+    // // // add edge cased
+    // // // NEGATIVE CASES?
+    // snprintf(buf, bufsize, "hi%*d", -5, -42);
+    // assert(strcmp(buf, "hi-42  ") == 0);
+    // assert(snprintf(buf, bufsize, "hi%*d",-5, -42) == 7);
+
+    // buf[0]='\0';
+    // assert(snprintf(buf, 6, "A %*p",9, (void*)0x890AB)==13);
+    // assert(strcmp(buf,"A 0x0")==0);
+
+    // buf[0]='\0';
+    // assert(snprintf(buf, 20, "A %*p", -9, (void*)0x890AB)==13);
+    // assert(strcmp(buf,"A 0x890ab0000")==0);
 }
 
 

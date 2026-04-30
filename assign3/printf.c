@@ -60,32 +60,40 @@ const char *decimal_string(long val) {
     return buf;
 }
 
+/**
+ * Converts an unsigned long integer to its string representation in the specified base.
+ *
+ * @param num    The unsigned long integer to convert.
+ * @param base   The numerical base for conversion (e.g., 2 for binary, 10 for decimal, 16 for hex).
+ * @param outstr Output buffer where the resulting null-terminated string will be stored.
+ *               Caller is responsible for ensuring the buffer is large enough to hold the result.
+ */
 void num_to_string(unsigned long num, int base, char *outstr) {
     char* reversed = outstr;
-    if (base == 10){
+    if (base == 10){ // for decimal
         while(num / 10  > 0){
-            unsigned long digit = num % base;
-            *reversed = (char)(digit + '0');
+            unsigned long digit = num % base; // isolate digit
+            *reversed = (char)(digit + '0'); // convert to char
             reversed++;
             num/=10;
         }
-        *reversed = (char)(num + '0');
+        *reversed = (char)(num + '0'); 
         reversed++;
     }
-    if(base == 16){
+    if(base == 16){ // hex 
         while(num / 16 > 0){
-            unsigned long int digit = num % base;
+            unsigned long int digit = num % base; //isolate digit
             if(digit < 10){
-                *reversed = (char)(digit + '0');
+                *reversed = (char)(digit + '0'); // convert to char
             }
             else{
-                *reversed = (char)(digit - 10 + 'a');
+                *reversed = (char)(digit - 10 + 'a'); // address the characters greater than 10
             }
             reversed++;
             num /= 16;
         }
         
-        if(num < 10){
+        if(num < 10){ 
             *reversed = (char)(num + '0');
         }
         else{
@@ -99,9 +107,10 @@ void num_to_string(unsigned long num, int base, char *outstr) {
 
     reversed = outstr; 
     int slen= strlen(reversed);
-    for(int i = 0; i < slen/2; i++){
-        // temp = reversed[strlen(reversed) - 1 - i];
-        temp = outstr[i];
+    
+    for(int i = 0; i < slen/2; i++){ //reverse, because num is lifo
+
+        temp = outstr[i]; /
         outstr[i] = outstr[slen- 1 - i];
         outstr[slen -1 - i] = temp;
 
@@ -111,16 +120,22 @@ void num_to_string(unsigned long num, int base, char *outstr) {
     outstr[strlen(reversed)] = '\0';
     return;
 
-    //reverse the string now
+
 
 }
-
+/* vsnprintf: the main workhorse behind printf/snprintf.
+ * Walks through the format string one character at a time — plain characters
+ * get copied straight to buf, and % specifiers get replaced with formatted args.
+ * Won't write past bufsize, but still returns how many chars the full output
+ * would have been (so callers can detect truncation).
+ *
+ * Handles: %c, %s, %d, %x, %p, %ld, %lx, %%
+ * Also handles field widths like %8d or %04x.
+ */
 int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
-    /***** TODO: Your code goes here *****/
+
     buf[0] = '\0'; // start with empty string in buffer
-    // int length = 0;
-    int exp_length = 0;
-    // va_list ap; // declare va_list
+    int exp_length = 0; // return value from strlcat (expected final length)
     char temp[2] = "";
     char *new = temp;
     int fw = 0; 
@@ -132,35 +147,32 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
     // va_start(args, format); // init va_list, read arguments following argument named n
     for(int i = 0; i<strlen(format); i++){
         if((format[i] == '%') && (i < strlen(format) - 1)){
-            // loop through format for all the decimal digits until dont have any more numbers
-            // save that integer
-            // function for padding
-            // function for truncating
             k= i + 1;
+         // scan ahead past any field-width digits (ex the "8" in %8d)
             while(format[k] >= '0' && format[k] <= '9'){
-                tempfw[k - i - 1] = format[k];
+                tempfw[k - i - 1] = format[k];  // collect width digits into temp buffer
                 k++;
-                has_width=1;
+                has_width=1;  // mark that we found at least one width digit
                 
             }
             i = k-1;
             if (has_width==1) {
                 tempfw[k] = '\0';
-                fw = strtonum(tempfw, NULL);
+                fw = strtonum(tempfw, NULL);   // convert collected digits to integer width
             }
             else {
                 fw=0;
             }
 
-            if(format[i + 1] == '%'){
+            if(format[i + 1] == '%'){ // case where %% becomes %
                 *new = '%';
                 new ++;
                 *new = '\0';
                 new--;
-                if(bufsize <= (strlen(buf) + strlen(new))){
+                if(bufsize <= (strlen(buf) + strlen(new))){ //buffer check
                     exp_length = strlcat(buf,new, bufsize);
                     if(overflow == 1){
-                        totallen += strlen(new);
+                        totallen += strlen(new);   // already overflowed: accumulate manually
                     }
                     else{
                         totallen = exp_length;
@@ -173,24 +185,24 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 }
                 i++;
             }
-            else if(format[i + 1] == 'c'){
-                char arg = (char)va_arg(args, int);
+            else if(format[i + 1] == 'c'){  // %c becomes single character
+                char arg = (char)va_arg(args, int); // char is promoted to int in varargs
 
                 *new = arg;
                 new ++;
                 *new = '\0';
                 new--;
-                char result[fw+1];  
+                char result[fw+1];  // buffer for padded
                 // result[0] = '\0';       
                 int npadding = 0;
-                if( fw > strlen(new)){
+                if( fw > strlen(new)){  // field width wider than character: pad with spaces
                     npadding = fw - strlen(new);
                     for( int j = 0; j<npadding +strlen(new); j++){
                         if(j < npadding){
-                            result[j] = ' ';
+                            result[j] = ' ';  // leading space padding
                         }
                         else{
-                            result[j] = new[j - npadding];
+                            result[j] = new[j - npadding]; //copy the remaining sources
                         }
                     }  
                     result[npadding + strlen(new)] = '\0';
@@ -198,7 +210,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     if(bufsize <= (strlen(buf) + strlen(new))){
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
-                            totallen += strlen(new);
+                            totallen += strlen(new); 
                         }
                         else{
                             totallen = exp_length;
@@ -206,12 +218,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         overflow = 1;
                     }
                     else{
-                        exp_length = strlcat(buf,new, bufsize);
+                        exp_length = strlcat(buf,new, bufsize); // add the padded string to the original
                         totallen = exp_length;
                     }
                 }
-                else{
-                    // exp_length = strlcat(buf,strarg, bufsize);
+                else{  // no padding needed
+                
                     if(bufsize <= (strlen(buf) + strlen(new))){
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
@@ -234,19 +246,19 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 i++;
 
             }
-            else if(format[i + 1] == 's'){
+            else if(format[i + 1] == 's'){ // string functio
                 char* arg = va_arg(args, char*);
                 //new = arg;
-                char result[fw + 1];         
+                char result[fw + 1];         // buffer for padded result 
                 int npadding = 0;
                 if( fw > strlen(arg)){
-                    npadding = fw - strlen(arg);
+                    npadding = fw - strlen(arg); // field width wider than string: left-pad with spaces
                     for( int j = 0; j<npadding +strlen(arg); j++){
                         if(j < npadding){
-                            result[j] = ' ';
+                            result[j] = ' '; // leading space padding
                         }
                         else{
-                            result[j] = arg[j - npadding];
+                            result[j] = arg[j - npadding]; // copy the rest
                         }
                     } 
                     // result[npadding + strlen(arg)] = '\0'; 
@@ -288,12 +300,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 }
                 i++;
             }
-            else if(format[i + 1] == 'd'){
+            else if(format[i + 1] == 'd'){  // %d = signed decimal
                 int arg = va_arg(args, int);
-                const char* strarg = decimal_string(arg);
+                const char* strarg = decimal_string(arg); // convert to decimal string
                 char result[fw + 1];         
                 int npadding = 0;
-                if( fw > strlen(strarg)){
+                if( fw > strlen(strarg)){   // field width wider than number: left-pad with spaces
                     npadding = fw - strlen(strarg);
                     for( int j = 0; j<npadding +strlen(strarg); j++){
                         if(j < npadding){
@@ -340,17 +352,17 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 }
                 i++;
             }
-            else if(format[i + 1] == 'x'){
+            else if(format[i + 1] == 'x'){ // %x becomes unsigned hex integer
                 int arg = va_arg(args, int);
 
-                const char* strarg = hex_string(arg);
-                char result[fw + 1];         
+                const char* strarg = hex_string(arg); //converts to hex string
+                char result[fw + 1];         // buffer for padding
                 int npadding = 0;
-                if( fw > strlen(strarg)){
+                if( fw > strlen(strarg)){ //field width wider than hex: left-pad;
                     npadding = fw - strlen(strarg);
                     for( int j = 0; j<npadding +strlen(strarg); j++){
                         if(j < npadding){
-                            result[j] = '0';
+                            result[j] = '0'; // leading zero padding
                         }
                         else{
                             result[j] = strarg[j - npadding];
@@ -369,14 +381,14 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         overflow = 1;
                     }
                     else{
-                        exp_length = strlcat(buf,new, bufsize);
-                        totallen = exp_length;
+                        exp_length = strlcat(buf,new, bufsize); // concatenate original string with padded input
+                        totallen = exp_length; // keep track of the length
                     }
                 }
                 else{
                     // exp_length = strlcat(buf,strarg, bufsize);
                     //new = strarg;
-                    if(bufsize <= (strlen(buf) + strlen(strarg))){
+                    if(bufsize <= (strlen(buf) + strlen(strarg))){ // no padding needed
                         exp_length = strlcat(buf,strarg, bufsize);
                         if(overflow == 1){
                             totallen += strlen(strarg);
@@ -393,24 +405,24 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 }
                 i++;
             }
-            else if(format[i + 1] == 'p'){
+            else if(format[i + 1] == 'p'){// %p becomes pointer (printed as 0x + zero-padded hex)
                 unsigned long arg = va_arg(args, unsigned long);
 
-                const char* strarg = hex_string(arg);
+                const char* strarg = hex_string(arg); // convert to hex
     
                 if (fw == 0){
-                    fw = 8;
+                    fw = 8;  //default is 8 
                 }     
                 char result[100];
                 int npadding = 0;
-                result[0] = '0';
+                result[0] = '0'; // prepend 0x prefix for pointer
                 result[1] = 'x';
 
-                if( fw > strlen(strarg)){
+                if( fw > strlen(strarg)){ // pad hex portion with zeros.
                     npadding = fw - strlen(strarg);
                     for( int j = 2; j<npadding +strlen(strarg) + 2; j++){
                         if(j < npadding + 2){
-                            result[j] = '0';
+                            result[j] = '0'; // leading zero padding after 0x
                         }
                         else{
                             result[j] = strarg[j - npadding - 2];
@@ -433,7 +445,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         totallen = exp_length;
                     }
                 }
-                else{
+                else{ // no padding needed
                     // exp_length = strlcat(buf,strarg, bufsize);
                     //new = strarg;
                     if(bufsize <= (strlen(buf) + strlen(strarg))){
@@ -457,16 +469,16 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 i++;
             }
             else if(i <strlen(format) - 2){
-                if(format[i + 1] == 'l' && format[i+2] == 'd'){
+                if(format[i + 1] == 'l' && format[i+2] == 'd'){ // %ld becomes signed long decimal
                     long arg = va_arg(args, long);
-                    const char* strarg = decimal_string(arg);
+                    const char* strarg = decimal_string(arg);   // convert long to decimal string
                     char result[fw + 1];         
                     int npadding = 0;
                     if( fw > strlen(strarg)){
-                        npadding = fw - strlen(strarg);
+                        npadding = fw - strlen(strarg); // left-pad with spaces to reach field width
                         for( int j = 0; j<npadding +strlen(strarg); j++){
                             if(j < npadding){
-                                result[j] = ' ';
+                                result[j] = ' '; // leading space padding
                             }
                             else{
                                 result[j] = strarg[j - npadding];
@@ -511,15 +523,15 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     //     return exp_length;
                     // }
                     
-                    i+=2;
+                    i+=2;    // skip past both 'l' and 'd'
                 }
-                if(format[i + 1] == 'l' && format[i+2] == 'x'){
+                if(format[i + 1] == 'l' && format[i+2] == 'x'){// %lx becomes unsigned long hex
                     unsigned long arg = va_arg(args, unsigned long);
-                    const char* strarg = hex_string(arg);
+                    const char* strarg = hex_string(arg);    // convert unsigned long to hex string
                     char result[fw + 1];         
                     int npadding = 0;
                     if( fw > strlen(strarg)){
-                        npadding = fw - strlen(strarg);
+                        npadding = fw - strlen(strarg);  // left-pad with zeros to reach field width
                         for( int j = 0; j<npadding +strlen(strarg); j++){
                             if(j < npadding){
                                 result[j] = '0';
@@ -568,17 +580,17 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     // if(exp_length > strlen(buf)){
                     //     return exp_length;
                     // }
-                    i+=2;
+                    i+=2; // skip past both 'l' and 'x'
                 }
             }
 
             else{
 
-                break;
+                break;   // unrecognized specifier at end of string; stop
             }
 
         }
-        else{
+        else{ // ordinary (non-%) character: copy literally
             *new = format[i];
             new++;
             *new = '\0';
@@ -608,312 +620,37 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
     }
     
     // va_end(args);
-    return  totallen;
+    return  totallen; // total chars that would have been written (may exceed bufsize if truncated)
 
 
 }
-
+/* snprintf: public interface for formatted printing into a sized buffer.
+ * Wraps vsnprintf, handling va_list setup and teardown.
+ * Returns the total number of characters that would have been written
+ * (not counting null terminator), even if truncated by bufsize. */
 
 int snprintf(char *buf, size_t bufsize, const char *format, ...) {
     va_list ap;
-    va_start(ap, format);
+    va_start(ap, format);// initialize va_list to read variadic args
     int result = vsnprintf(buf, bufsize, format, ap);
-    va_end(ap);
+    va_end(ap);    // clean up va_list
     return result;
-    // /***** TODO: Your code goes here *****/
-    // buf[0] = '\0'; // start with empty string in buffer
-    // // int length = 0;
-    // int exp_length = 0;
-    // va_list ap; // declare va_list
-    // char temp[2] = "";
-    // char *new = temp;
-    // int fw = 0; 
-    // int k = 0;
-    // int has_width=0;
-    // char tempfw[32767];
-    // va_start(ap, format); // init va_list, read arguments following argument named n
-    // for(int i = 0; i<strlen(format); i++){
-    //     if((format[i] == '%') && (i < strlen(format) - 1)){
-    //         // loop through format for all the decimal digits until dont have any more numbers
-    //         // save that integer
-    //         // function for padding
-    //         // function for truncating
-    //         k= i + 1;
-    //         while(format[k] >= '0' && format[k] <= '9'){
-    //             tempfw[k - i - 1] = format[k];
-    //             k++;
-    //             has_width=1;
-                
-    //         }
-    //         i = k-1;
-    //         if (has_width==1) {
-    //             tempfw[k] = '\0';
-    //             fw = strtonum(tempfw, NULL);
-    //         }
-    //         else {
-    //             fw=0;
-    //         }
-
-    //         if(format[i + 1] == '%'){
-    //             *new = '%';
-    //             new ++;
-    //             *new = '\0';
-    //             new--;
-    //             exp_length = strlcat(buf,new, bufsize);
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-                
-    //             i++;
-    //         }
-    //         else if(format[i + 1] == 'c'){
-    //             char arg = (char)va_arg(ap, int);
-
-    //             *new = arg;
-    //             new ++;
-    //             *new = '\0';
-    //             new--;
-    //             char result[fw+1];  
-    //             // result[0] = '\0';       
-    //             int npadding = 0;
-    //             if( fw > strlen(new)){
-    //                 npadding = fw - strlen(new);
-    //                 for( int j = 0; j<npadding +strlen(new); j++){
-    //                     if(j < npadding){
-    //                         result[j] = ' ';
-    //                     }
-    //                     else{
-    //                         result[j] = new[j - npadding];
-    //                     }
-    //                 }  
-    //                 result[npadding + strlen(new)] = '\0';
-    //                 exp_length = strlcat(buf,result, bufsize);
-    //             }
-    //             else{
-    //                 exp_length = strlcat(buf,new, bufsize);
-    //             }
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-               
-    //             i++;
-
-    //         }
-    //         else if(format[i + 1] == 's'){
-    //             char* arg = va_arg(ap, char*);
-    //             //new = arg;
-    //             char result[fw + 1];         
-    //             int npadding = 0;
-    //             if( fw > strlen(arg)){
-    //                 npadding = fw - strlen(arg);
-    //                 for( int j = 0; j<npadding +strlen(arg); j++){
-    //                     if(j < npadding){
-    //                         result[j] = ' ';
-    //                     }
-    //                     else{
-    //                         result[j] = arg[j - npadding];
-    //                     }
-    //                 } 
-    //                 // result[npadding + strlen(arg)] = '\0'; 
-    //                 exp_length = strlcat(buf,result, bufsize);
-    //             }
-    //             else{
-    //                 exp_length = strlcat(buf,arg, bufsize);
-    //             }
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-    //             i++;
-    //         }
-    //         else if(format[i + 1] == 'd'){
-    //             int arg = va_arg(ap, int);
-    //             const char* strarg = decimal_string(arg);
-    //             char result[fw + 1];         
-    //             int npadding = 0;
-    //             if( fw > strlen(strarg)){
-    //                 npadding = fw - strlen(strarg);
-    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
-    //                     if(j < npadding){
-    //                         result[j] = '0';
-    //                     }
-    //                     else{
-    //                         result[j] = strarg[j - npadding];
-    //                     }
-    //                 } 
-    //                 result[npadding + strlen(strarg)] = '\0'; 
-    //                 exp_length = strlcat(buf,result, bufsize);
-    //             }
-    //             else{
-    //                 exp_length = strlcat(buf,strarg, bufsize);
-    //             }
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-    //             i++;
-    //         }
-    //         else if(format[i + 1] == 'x'){
-    //             int arg = va_arg(ap, int);
-
-    //             const char* strarg = hex_string(arg);
-    //             char result[fw + 1];         
-    //             int npadding = 0;
-    //             if( fw > strlen(strarg)){
-    //                 npadding = fw - strlen(strarg);
-    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
-    //                     if(j < npadding){
-    //                         result[j] = '0';
-    //                     }
-    //                     else{
-    //                         result[j] = strarg[j - npadding];
-    //                     }
-    //                 }  
-    //                 result[npadding + strlen(strarg)] = '\0';
-    //                 exp_length = strlcat(buf,result, bufsize);
-    //             }
-    //             else{
-    //                 exp_length = strlcat(buf,strarg, bufsize);
-    //             }
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-    //             i++;
-    //         }
-    //         else if(format[i + 1] == 'p'){
-    //             unsigned long arg = va_arg(ap, unsigned long);
-
-    //             const char* strarg = hex_string(arg);
-    //             char result[9];         
-    //             int npadding = 0;
-    //             if( 8 > strlen(strarg)){
-    //                 npadding = 8 - strlen(strarg);
-    //                 for( int j = 0; j<npadding +strlen(strarg); j++){
-    //                     if(j < npadding){
-    //                         result[j] = '0';
-    //                     }
-    //                     else{
-    //                         result[j] = strarg[j - npadding];
-    //                     }
-    //                 }  
-    //                 result[npadding + strlen(strarg)] = '\0';
-    //                 exp_length = strlcat(buf,result, bufsize);
-    //             }
-    //             else{
-    //                 exp_length = strlcat(buf,strarg, bufsize);
-    //             }
-    //             if(exp_length > strlen(buf)){
-    //                 return exp_length;
-    //             }
-    //             i++;
-    //         }
-    //         else if(i <strlen(format) - 2){
-    //             if(format[i + 1] == 'l' && format[i+2] == 'd'){
-    //                 long arg = va_arg(ap, long);
-    //                 const char* strarg = decimal_string(arg);
-    //                 char result[fw + 1];         
-    //                 int npadding = 0;
-    //                 if( fw > strlen(strarg)){
-    //                     npadding = fw - strlen(strarg);
-    //                     for( int j = 0; j<npadding +strlen(strarg); j++){
-    //                         if(j < npadding){
-    //                             result[j] = '0';
-    //                         }
-    //                         else{
-    //                             result[j] = strarg[j - npadding];
-    //                         }
-    //                     }  
-    //                     result[npadding + strlen(strarg)] = '\0';
-    //                     exp_length = strlcat(buf,result, bufsize);
-    //                 }
-    //                 else{
-    //                     result[npadding + strlen(strarg)] = '\0';
-    //                     exp_length = strlcat(buf,strarg, bufsize);
-    //                 }
-    //                 if(exp_length > strlen(buf)){
-    //                     return exp_length;
-    //                 }
-    //                 i+=2;
-    //             }
-    //             if(format[i + 1] == 'l' && format[i+2] == 'x'){
-    //                 unsigned long arg = va_arg(ap, unsigned long);
-    //                 const char* strarg = hex_string(arg);
-    //                 char result[fw + 1];         
-    //                 int npadding = 0;
-    //                 if( fw > strlen(strarg)){
-    //                     npadding = fw - strlen(strarg);
-    //                     for( int j = 0; j<npadding +strlen(strarg); j++){
-    //                         if(j < npadding){
-    //                             result[j] = '0';
-    //                         }
-    //                         else{
-    //                             result[j] = strarg[j - npadding];
-    //                         }
-    //                     }  
-    //                     result[npadding + strlen(strarg)] = '\0';
-    //                     exp_length = strlcat(buf,result, bufsize);
-    //                 }
-    //                 else{
-    //                     exp_length = strlcat(buf,strarg, bufsize);
-    //                 }
-
-    //                 if(exp_length > strlen(buf)){
-    //                     return exp_length;
-    //                 }
-    //                 i+=2;
-    //             }
-    //         }
-
-    //         else{
-
-    //             break;
-    //         }
-
-    //     }
-    //     else{
-    //         *new = format[i];
-    //         new++;
-    //         *new = '\0';
-    //         new--;
-    //         exp_length = strlcat(buf,new, bufsize);
-    //         if(exp_length > strlen(buf)){
-    //             return exp_length;
-    //         }
-    //     }
-
-    // }
-    
-    // va_end(ap);
-    // return  exp_length;
-
-
-    // // va_list ap; // declare va_list
-
-    // // va_start(ap, n); // init va_list, read arguments following argument named n
-    // // for (int i = 0; i < n; i++) {
-    // //    int arg = va_arg(ap, int); // access value of next argument, type is `int`
-    // //    result += arg;
-    // // }
-    // // va_end(ap);   // clean up
-
-
-
-    // // if(format[1] == '%' && ap == '%'){
-
-    // // }
-    
-    // // return (int)strlcat(buf, format, bufsize);
-
    
 }
 
+/* printf: formatted print to UART output.
+ * Uses a fixed internal buffer of MAX_OUTPUT_LEN bytes.
+ * Returns the total number of characters that would have been written. */
 int printf(const char *format, ...) {
     const int MAX_OUTPUT_LEN = 1024; // ok to assume printf output never longer than this
-    /***** TODO: Your code goes here *****/
+  
     char buf[MAX_OUTPUT_LEN];
     int bufsize = MAX_OUTPUT_LEN;
 
     va_list ap;
-    va_start(ap, format);
+    va_start(ap, format);  // initialize va_list to read variadic args
     int result = vsnprintf(buf, bufsize, format, ap);
     va_end(ap);
-    return result;
+    return result;             // clean up va_list
+
 }
