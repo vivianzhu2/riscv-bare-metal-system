@@ -15,7 +15,7 @@ const char *hex_string(unsigned long val);
 const char *decimal_string(long val);
 
 
-static void test_memset(void) {
+static void test_memset(void) { // memset tests for setting memory to a specific value, including edge cases with different buffer sizes and values
     char buf[25];
     size_t bufsize = sizeof(buf);
 
@@ -51,7 +51,7 @@ static void test_memset(void) {
         else    assert(buf3[i] != 0x7e);     
 }
 
-static void test_strcmp(void) {
+static void test_strcmp(void) { // strcmp tests for comparing strings, including edge cases with different lengths and characters
     assert(strcmp("me", "me") == 0);
     assert(strcmp("me", "you") != 0);
 
@@ -67,7 +67,7 @@ static void test_strcmp(void) {
    
 }
 
-static void test_strlcat(void) {
+static void test_strlcat(void) { // strlcat tests for appending strings with various buffer sizes, including edge cases where the buffer is too small to hold the entire result
     char buf[20];
     size_t bufsize = sizeof(buf);
     // as aid for debugging, fill contents of buffer with repeat value 0x7e
@@ -158,7 +158,7 @@ static void test_strlcat(void) {
 
 }
 
-static void test_strtonum(void) {
+static void test_strtonum(void) { // strtonum tests for converting strings to numbers, including edge cases and error handling
     assert(strtonum("67", NULL) == 67);
 
     const char *input = "107rocks";
@@ -242,7 +242,7 @@ static void test_strtonum(void) {
     
 }
 
-static void test_helpers(void) {
+static void test_helpers(void) { // tests for helper functions used by printf, such as num_to_string, decimal_string, and hex_string
     char buf[32];
     size_t bufsize = sizeof(buf);
     memset(buf, 0x7e, bufsize); // for debug, init array contents with fixed repeat value
@@ -263,7 +263,7 @@ static void test_helpers(void) {
     //assert(strcmp(hex_string(-0x107e), "-107e") == 0);   
 }
 
-static void test_snprintf(void) {
+static void test_snprintf(void) { // snprintf tests are in test_printf.c
     char buf[100];
     size_t bufsize = sizeof(buf);
     memset(buf, 0x7e, bufsize); // for debug, init array contents with fixed repeat value
@@ -445,15 +445,15 @@ static void test_snprintf(void) {
     assert(snprintf(buf, 6, "A %p", NULL)==12);
     assert(strcmp(buf,"A 0x0")==0);
     buf[0]='\0';
-    // assert(snprintf(buf, 7, "A %p %s %x", (void*)0x890AB,"(void*)0x890AB",0x890AB)==33);
-    // assert(strcmp(buf,"A 0x00")==0);
+    assert(snprintf(buf, 7, "A %p %s %x", (void*)0x890AB,"void*)0x890AB",0x890AB)==32);
+    assert(strcmp(buf,"A 0x00")==0);
     // buf[0]='\0';
 
     buf[0]='\0';
     assert(snprintf(buf, 6, "abc%sefg%s", "vvvvv", "wwwww")==16);
     assert(strcmp(buf,"abcvv")==0);
     
-
+// extention tests for negtive width and %*s
     // snprintf(buf, bufsize, "hello%-5c", 'v');
     // assert(strcmp(buf, "hellov    ") == 0);
     // snprintf(buf, bufsize, "print%-3c", 'f');
@@ -554,17 +554,8 @@ static void test_snprintf(void) {
 }
 
 
-static void test_printf(void) {
-    // No formatting codes
-//     printf("Hello, world!");
+static void test_printf(void) { // printf tests for various format strings and arguments, including edge cases and error handling
 
-
-
-//     // // One string formatting code
-//    printf( "%s", "binky");
-
-
-//    printf( "hello%c", 'v');
     printf("hi%5d", -42);
     assert(printf("hi%5d", -42) == 7);
 
@@ -585,7 +576,7 @@ static void test_printf(void) {
 
    printf( "%ld", 12345678901);
 
-    assert(printf( "%ld", 12345678901) == 11);
+   assert(printf( "%ld", 12345678901) == 11);
 
    printf( "%lx", 0x123456789abcdef);
     assert(printf( "%lx", 0x123456789abcdef) == 15);
@@ -624,13 +615,9 @@ static void test_printf(void) {
    printf( "0123%6x", 0xa67);
    
     assert(printf( "0123%6x", 0xa67) == 10);
-    // add edge cased
-    // NEGATIVE CASES?
-    //printf( "hi%5d", -42);
-    // assert(strcmp(buf, "hi-0042") == 0);
-    // assert(printf( "hi%5d", -42) == 7);
 
-    //short/ long?
+
+
    printf( "count%10ld", (long)123456789);
 
     assert(printf( "count%10ld", (long)123456789) == 15);
@@ -643,12 +630,12 @@ static void test_printf(void) {
     assert(printf( "a%1lx", (unsigned long)0x123456789abcdef) == 16);
 
    printf( "d%p", (void*)0x1234);
-    assert(printf( "d%p", (void*)0x1234) == 9);
+   assert(printf( "d%p", (void*)0x1234) == 11);
 
 
 
 }
-//negative numebrs and short.long
+
 void main(void) {
     uart_init();
     uart_putstring("Start execute main() in test_strings_printf.c\n");
@@ -656,15 +643,13 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    test_memset();
-    test_strcmp();
-    test_strlcat();
-    test_strtonum();
-    test_helpers();
-    test_snprintf();
-    // test_printf();
-
-    /***** TODO: Add more and better tests!  *****/
+    test_memset(); //   memset tests for setting memory to a specific value, including edge cases with different buffer sizes and values   
+    test_strcmp(); // strcmp tests for comparing strings, including edge cases with different lengths and characters
+    test_strlcat(); // strlcat tests for appending strings with various buffer sizes, including edge cases where the buffer is too small to hold the entire result
+    test_strtonum(); // strtonum tests for converting strings to numbers, including edge cases and error handling
+    test_helpers(); // tests for helper functions used by printf, such as num_to_string, decimal_string, and hex_string
+    test_snprintf(); // snprintf tests for various format strings and arguments, including edge cases and error handling
+    test_printf(); // printf tests for various format strings and arguments, including edge cases and error handling
 
     uart_putstring("Successfully finished executing main() in test_strings_printf.c\n");
 }

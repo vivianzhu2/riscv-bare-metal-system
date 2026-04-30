@@ -110,7 +110,7 @@ void num_to_string(unsigned long num, int base, char *outstr) {
     
     for(int i = 0; i < slen/2; i++){ //reverse, because num is lifo
 
-        temp = outstr[i]; /
+        temp = outstr[i];
         outstr[i] = outstr[slen- 1 - i];
         outstr[slen -1 - i] = temp;
 
@@ -146,7 +146,8 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
     int totallen= 0;
     // va_start(args, format); // init va_list, read arguments following argument named n
     for(int i = 0; i<strlen(format); i++){
-        if((format[i] == '%') && (i < strlen(format) - 1)){
+        if((format[i] == '%') && (i < strlen(format) - 1)){ // found a % specifier, and it's not the last character in the string
+            //has_width=0;
             k= i + 1;
          // scan ahead past any field-width digits (ex the "8" in %8d)
             while(format[k] >= '0' && format[k] <= '9'){
@@ -175,11 +176,11 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         totallen += strlen(new);   // already overflowed: accumulate manually
                     }
                     else{
-                        totallen = exp_length;
+                        totallen = exp_length;// first overflow: use strlcat return value
                     }
                     overflow = 1;
                 }
-                else{
+                else{  // no overflow yet: use strlcat return value
                     exp_length = strlcat(buf,new, bufsize);
                     totallen = exp_length;
                 }
@@ -207,24 +208,24 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     }  
                     result[npadding + strlen(new)] = '\0';
                     new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){  // buffer check for padded string
                         exp_length = strlcat(buf,new, bufsize);
-                        if(overflow == 1){
+                        if(overflow == 1){ // already overflowed: accumulate manually
                             totallen += strlen(new); 
                         }
-                        else{
+                        else{ // first overflow: use strlcat return value
                             totallen = exp_length;
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{ // no overflow yet: use strlcat return value
                         exp_length = strlcat(buf,new, bufsize); // add the padded string to the original
                         totallen = exp_length;
                     }
                 }
                 else{  // no padding needed
                 
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){  // buffer check for unpadded character
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
                             totallen += strlen(new);
@@ -234,14 +235,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{  // no overflow yet: use strlcat return value
                         exp_length = strlcat(buf,new, bufsize);
                         totallen = exp_length;
                     }
                 }
-                // if(exp_length > strlen(buf)){
-                //     return exp_length;
-                // }
+
                
                 i++;
 
@@ -261,9 +260,9 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             result[j] = arg[j - npadding]; // copy the rest
                         }
                     } 
-                    // result[npadding + strlen(arg)] = '\0'; 
+                   // result[npadding + strlen(arg)] = '\0'; 
                     new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){  // buffer check for padded string
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
                             totallen += strlen(new);
@@ -274,12 +273,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{ // no overflow yet: use strlcat return value
                         exp_length = strlcat(buf,new, bufsize);
                         totallen = exp_length;
                     }
                 }
-                else{
+                else{ // no padding needed
                     // exp_length = strlcat(buf,strarg, bufsize);
                     new = arg;
                     if(bufsize <= (strlen(buf) + strlen(new))){
@@ -317,7 +316,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     } 
                     result[npadding + strlen(strarg)] = '\0'; 
                     new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){ // buffer check for padded number
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
                             totallen += strlen(new);
@@ -327,12 +326,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{ // no overflow yet: use strlcat return value
                         exp_length = strlcat(buf,new, bufsize);
                         totallen = exp_length;
                     }
                 }
-                else{
+                else{ // no padding needed
                     // exp_length = strlcat(buf,strarg, bufsize);
                     //new = strarg;
                     if(bufsize <= (strlen(buf) + strlen(strarg))){
@@ -370,7 +369,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     }  
                     result[npadding + strlen(strarg)] = '\0';
                     new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){  // 
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
                             totallen += strlen(new);
@@ -380,15 +379,15 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{  // no overflow yet: use strlcat return value  
                         exp_length = strlcat(buf,new, bufsize); // concatenate original string with padded input
                         totallen = exp_length; // keep track of the length
                     }
                 }
-                else{
+                else{ // field width not wider than hex: no padding needed
                     // exp_length = strlcat(buf,strarg, bufsize);
                     //new = strarg;
-                    if(bufsize <= (strlen(buf) + strlen(strarg))){ // no padding needed
+                    if(bufsize <= (strlen(buf) + strlen(strarg))){ // buffer check for unpadded hex string
                         exp_length = strlcat(buf,strarg, bufsize);
                         if(overflow == 1){
                             totallen += strlen(strarg);
@@ -398,7 +397,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{ // no overflow yet: use strlcat return value
                         exp_length = strlcat(buf,strarg, bufsize);
                         totallen = exp_length;
                     }
@@ -430,7 +429,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     }  
                     result[npadding + strlen(strarg) + 2] = '\0';
                     new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){
+                    if(bufsize <= (strlen(buf) + strlen(new))){ // buffer check for padded pointer string
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
                             totallen += strlen(new);
@@ -440,7 +439,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }
                         overflow = 1;
                     }
-                    else{
+                    else{ //    
                         exp_length = strlcat(buf,new, bufsize);
                         totallen = exp_length;
                     }
@@ -474,7 +473,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     const char* strarg = decimal_string(arg);   // convert long to decimal string
                     char result[fw + 1];         
                     int npadding = 0;
-                    if( fw > strlen(strarg)){
+                    if( fw > strlen(strarg)){  // field width wider than number: left-pad with spaces
                         npadding = fw - strlen(strarg); // left-pad with spaces to reach field width
                         for( int j = 0; j<npadding +strlen(strarg); j++){
                             if(j < npadding){
@@ -486,7 +485,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         }  
                         result[npadding + strlen(strarg)] = '\0';
                         new = result;
-                        if(bufsize <= (strlen(buf) + strlen(new))){
+                        if(bufsize <= (strlen(buf) + strlen(new))){ // buffer check for padded long decimal string
                             exp_length = strlcat(buf,new, bufsize);
                             if(overflow == 1){
                                 totallen += strlen(new);
@@ -496,12 +495,12 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             }
                             overflow = 1;
                         }
-                        else{
+                        else{ // no overflow yet: use strlcat return value
                             exp_length = strlcat(buf,new, bufsize);
                             totallen = exp_length;
                         }
                     }
-                    else{
+                    else{ // no padding needed
                         // exp_length = strlcat(buf,strarg, bufsize);
                         // new = strarg;
                         if(bufsize <= (strlen(buf) + strlen(strarg))){
@@ -514,7 +513,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             }
                             overflow = 1;
                         }
-                        else{
+                        else{  // no overflow yet: use strlcat return value
                             exp_length = strlcat(buf,strarg, bufsize);
                             totallen = exp_length;
                         }
@@ -543,7 +542,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         result[npadding + strlen(strarg)] = '\0';
                         // exp_length = strlcat(buf,result, bufsize); 
                         new = result;
-                        if(bufsize <= (strlen(buf) + strlen(new))){
+                        if(bufsize <= (strlen(buf) + strlen(new))){ // buffer check for padded long hex string
                             exp_length = strlcat(buf,new, bufsize);
                             if(overflow == 1){
                                 totallen += strlen(new);
@@ -553,7 +552,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             }
                             overflow = 1;
                         }
-                        else{
+                        else{ // no overflow yet: use strlcat return value
                             exp_length = strlcat(buf,new, bufsize);
                             totallen = exp_length;
                         }
@@ -561,7 +560,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     else{
                         // exp_length = strlcat(buf,strarg, bufsize);
                         // new = strarg;
-                        if(bufsize <= (strlen(buf) + strlen(strarg))){
+                        if(bufsize <= (strlen(buf) + strlen(strarg))){ // buffer check for unpadded long hex string
                             exp_length = strlcat(buf,strarg, bufsize);
                             if(overflow == 1){
                                 totallen += strlen(strarg);
@@ -571,7 +570,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             }
                             overflow = 1;
                         }
-                        else{
+                        else{ //    no overflow yet: use strlcat return value
                             exp_length = strlcat(buf,strarg, bufsize);
                             totallen = exp_length;
                         }
@@ -597,7 +596,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
             new--;
 
 
-            if(bufsize <= (strlen(buf) + strlen(new))){
+            if(bufsize <= (strlen(buf) + strlen(new))){ // buffer check for ordinary character
                 exp_length = strlcat(buf,new, bufsize);
                 if(overflow == 1){
                     totallen += strlen(new);
@@ -607,7 +606,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 }
                 overflow = 1;
             }
-            else{
+            else{ //    no overflow yet: use strlcat return value
                 exp_length = strlcat(buf,new, bufsize);
                 totallen = exp_length;
             }
@@ -632,7 +631,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
 int snprintf(char *buf, size_t bufsize, const char *format, ...) {
     va_list ap;
     va_start(ap, format);// initialize va_list to read variadic args
-    int result = vsnprintf(buf, bufsize, format, ap);
+    int result = vsnprintf(buf, bufsize, format, ap); // call vsnprintf to implement snprintf, passing the va_list
     va_end(ap);    // clean up va_list
     return result;
    
@@ -649,8 +648,9 @@ int printf(const char *format, ...) {
 
     va_list ap;
     va_start(ap, format);  // initialize va_list to read variadic args
-    int result = vsnprintf(buf, bufsize, format, ap);
+    int result = vsnprintf(buf, bufsize, format, ap); // call vsnprintf to format into internal buffer, passing the va_list
     va_end(ap);
+    //uart_putstring(buf); // output the formatted string to UART
     return result;             // clean up va_list
 
 }

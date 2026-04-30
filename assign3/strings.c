@@ -13,9 +13,19 @@ void *memcpy(void *dst, const void *src, size_t n) {
     }
     return dst;
 }
-
+/*
+ * memset - fills the first n bytes of memory area dst with the constant byte val.
+ *
+ * Parameters:
+ *   dst - pointer to the memory area to fill
+ *   val - value to set (interpreted as an unsigned char)
+ *   n   - number of bytes to fill
+ *
+ * Returns:
+ *   a pointer to the memory area dst
+ */
 void *memset(void *dst, int val, size_t n) {
-    /***** TODO: Your code goes here *****/
+
     char *d = dst;
     const char *v = (const char *) &val; // cast val to char pointer to get the byte value of val
     while(n--) {
@@ -32,6 +42,21 @@ size_t strlen(const char *str) {
     }
     return n;
 }
+/*
+ * strcmp - compares two null-terminated strings lexicographically.
+ *
+ * Compares strings byte by byte using unsigned char values.
+ * Stops at the first differing character or when a null terminator is reached.
+ *
+ * Parameters:
+ *   s1 - pointer to the first null-terminated string
+ *   s2 - pointer to the second null-terminated string
+ *
+ * Returns:
+ *   0              if s1 and s2 are equal
+ *   negative int   if s1 is lexicographically less than s2
+ *   positive int   if s1 is lexicographically greater than s2
+ */
 
 int strcmp(const char *s1, const char *s2) {
     int length;
@@ -59,15 +84,25 @@ int strcmp(const char *s1, const char *s2) {
     }
     return 0;
 }
-
+/*
+ * strlcat - appends src to dst, null-terminated, capped at dstsize bytes total.
+ *
+ * Parameters:
+ *   dst     - destination buffer (must be null-terminated)
+ *   src     - source string to append
+ *   dstsize - total size of dst buffer
+ *
+ * Returns:
+ *   strlen(dst) + strlen(src) — if >= dstsize, truncation occurred.
+ */
 size_t strlcat(char *dst, const char *src, size_t dstsize) {
-    /***** TODO: Your code goes here *****/
+
     int strlen_dst = strlen(dst);
     int strlen_src = strlen(src);
-    char *d = dst;
+    char *d = dst; // initialize a pointer 
 
     const char *s = src;
-    int ifnull = (*d == '\0');
+    int ifnull = (*d == '\0'); 
     for(int i=0; i < dstsize; i++){
         if(*d == '\0'){ 
             ifnull = 1;
@@ -75,7 +110,7 @@ size_t strlcat(char *dst, const char *src, size_t dstsize) {
         }
         d++;
     }
-    if(ifnull == 0){
+    if(ifnull == 0){ // invalid case: return dstsize+ strlen(src)
         return dstsize + strlen(src); 
     }
 
@@ -88,7 +123,7 @@ size_t strlcat(char *dst, const char *src, size_t dstsize) {
         *d = *s;
        // *d++ = *s++; // copy the character from src to dst
         if(*s == '\0'){ // if we reach the end of src, we can stop copying
-            return (strlen_dst + strlen_src);
+            return (strlen_dst + strlen_src); // always return the expected sums of dst and src regardless of buffer
         }
         d++;
         s++;
@@ -100,8 +135,18 @@ size_t strlcat(char *dst, const char *src, size_t dstsize) {
 
 }
 
+/*
+ * strtonum - converts a string to an unsigned long.
+ *
+ * Parameters:
+ *   str    - string to parse (leading whitespace skipped)
+ *   endptr - if non-NULL, set to the character after the last digit parsed
+ *
+ * Returns:
+ *   the converted value, or 0 on error (check endptr to distinguish from "0").
+ */
 unsigned long strtonum(const char *str, const char **endptr) {
-    /***** TODO: Your code goes here *****/
+
     const char *s = str;
     
     if(! (*s  >= '0' && *s <= '9')){
@@ -116,13 +161,13 @@ unsigned long strtonum(const char *str, const char **endptr) {
             if(*s == 'x' || *s == 'X'){ // if the string starts with "0x" or "0X", then it is a hexadecimal number and we need to convert it accordingly
                 s++;
                 while((*s!= '\0') && ((*s>='0' && *s <= '9') || (*s >= 'a' && *s <= 'f') || (*s >= 'A' && *s<= 'F'))){
-                    if(*s>='0' && *s <= '9'){
+                    if(*s>='0' && *s <= '9'){ //if it is integer
                         result = (unsigned long)(*s- '0') + result * 16;
                     }
-                    else if(*s >= 'a' && *s <= 'f'){
+                    else if(*s >= 'a' && *s <= 'f'){ //if it is hex a-f
                         result = (unsigned long)(*s - 'a') + 10 + result * 16;
                     }
-                    else if(*s >= 'A' && *s <= 'F'){
+                    else if(*s >= 'A' && *s <= 'F'){ // if it is hex A-F
                         result = (unsigned long)(*s - 'A') + 10 + result * 16;
                     }
                     s++;
