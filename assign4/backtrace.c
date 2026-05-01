@@ -8,6 +8,8 @@
 #include "symtab.h"
 
 int backtrace_gather_frames(frame_t f[], int max_frames) {
+    // zero all frame values in array to start
+    memset(f, m0, ax_frames*sizeof(*f)); // do not remove this line
     /***** TODO: Your code goes here *****/
     return 0;
 }
