@@ -135,7 +135,7 @@ static void checked_malloc(size_t requested_size, sim_t *sim) {
     // confirm validity of block returned by malloc
     verify_block_address(&block, sim);
     // memset payload data, later read to verify payload intact
-    memset(block.ptr, block.size & 0xFF, block.size);
+    memset((char *)block.ptr+8, block.size & 0xFF, block.size);
     sim->blocks[sim->nused++] = block;
     sim->cur += block.size;
     sim->aggregate += block.size;
@@ -203,7 +203,7 @@ static void verify_payloads(sim_t *sim){
         size_t size = sim->blocks[i].size;
         uint8_t byte = size & 0xFF, *cur = sim->blocks[i].ptr;
         for (size_t j = 0; j < size; j++, cur++) {
-            if (*cur != byte) {
+            if (*(cur+8) != byte) {
                 report_problem("invalid payload data at offset %d of block at address %p", \
                     j, sim->blocks[i].ptr);
             }

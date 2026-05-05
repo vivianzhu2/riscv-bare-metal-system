@@ -102,11 +102,15 @@ static void test_heap_dump(void) {
     heap_dump("Empty heap");
 
     int *p = malloc(sizeof(int));
-    *p = 0;
+    // *p = 0;
+    // p+=2;
+    *(p+2) = 0;
     heap_dump("After p = malloc(4)");
 
     char *q = malloc(16);
-    memcpy(q, "aaaaaaaaaaaaaaa", 16);
+    //q+=8;
+
+    memcpy(q + 8, "aaaaaaaaaaaaaaa", 16);
     heap_dump("After q = malloc(16)");
 
     free(p);
@@ -123,18 +127,22 @@ static void test_heap_simple(void) {
     int len = strlen(alphabet);
 
     char *str = malloc(len + 1);
-    memcpy(str, alphabet, len + 1);
-
+    memcpy(str + 8, alphabet, len + 1);
+    heap_dump("After malloc alphabet");
     int n = 10;
     int *arr = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++) {
-        arr[i] = i;
+        arr[i + 2] = i;
     }
-
-    assert(strcmp(str, alphabet) == 0);
+    printf("str %s  %s",(char*)(str + 8), alphabet);
+    printf("arr %d", arr[10]);
+    assert(strcmp(str + 8, alphabet) == 0);
+    heap_dump("After malloc 10 arr");
     free(str);
-    assert(arr[0] == 0 && arr[n-1] == n-1);
+    heap_dump("After free str");
+    assert(arr[2] == 0 && arr[n+1] == n-1);
     free(arr);
+    heap_dump("After free arr");
 }
 
 static void test_heap_oddballs(void) {
@@ -148,9 +156,13 @@ static void test_heap_oddballs(void) {
     ptr = malloc(0); // legal request, though weird
     heap_dump("After malloc(0)");
     free(ptr);
+    // should this still increase allocs??
 
     free(NULL); // legal request, should do nothing
     heap_dump("After free(NULL)");
+    printf("ptr: %p", ptr);
+    //-1 in use? recognized the neighboring as a free. 
+    // 1 alloc, 2 frees. safeguard the free??
 }
 
 static void test_heap_multiple(void) {
@@ -162,18 +174,23 @@ static void test_heap_multiple(void) {
     char *arr[n];
 
     for (int i = 0; i < n; i++) {
-        int num_repeats = i + 1;
+        int num_repeats = i + 1 ;
         char *ptr = malloc(num_repeats + 1);
-        memset(ptr, 'A' - 1 + num_repeats, num_repeats);
-        ptr[num_repeats] = '\0';
+        memset(ptr + 8, 'A' - 1 + num_repeats, num_repeats);
+
+        
+        ptr[num_repeats + 8] = '\0';
         arr[i] = ptr;
+        printf("allocate: i: %d, arr[i]: %p", i, arr[i]);
     }
     heap_dump("After all allocations");
     for (int i = n-1; i >= 0; i--) {
-        int len = strlen(arr[i]);
-        char first = arr[i][0], last = arr[i][len -1];
+        int len = strlen(arr[i]+8);
+        char first = arr[i][8], last = arr[i][len -1 + 8];
+        printf("i: %d, arr[i]: %p, ptr: %c", i, arr[i], first);
         assert(first == 'A' - 1 + len);  // verify payload contents
         assert(first == last);
+       
         free(arr[i]);
     }
     heap_dump("After all frees");
@@ -186,8 +203,8 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    test_backtrace();
-    // test_stack_protector();
+    // test_backtrace();
+    test_stack_protector();
     // test_heap_dump();
     // test_heap_simple();
     // test_heap_oddballs();

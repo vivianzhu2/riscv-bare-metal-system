@@ -1,1 +1,110 @@
-// Style reflection submitted with assign4
+Review your printf module and find at least one place where you have duplicated code that could have instead called upon a function written earlier in the printf or strings modules. Show how you could replace the duplicated code with a call to the existing function.
+
+In printf, I used a lot of repetition in each of the individual type formatting. For example, when no padding was needed, this code was repeated for each type. I think that if I put this into a function with parameters like new or strarg,  and the buffer and buf size, it would reduce redundancy and make the code cleaner and more efficient to adapt into other code. 
+                   if(bufsize <= (strlen(buf) + strlen(new))){ //buffer check
+                       exp_length = strlcat(buf,new, bufsize);
+                       if(overflow == 1){
+                           totallen += strlen(new);
+                       }
+                       else{
+                           totallen = exp_length;
+                       }
+                       overflow = 1;
+                   }
+                   else{
+                       exp_length = strlcat(buf,new, bufsize); 
+                       totallen = exp_length;
+                   }
+               }
+
+
+               i++;
+
+
+
+
+Instead, my other function could be
+size_t append_with_tracking(char *buf, const char *src, size_t bufsize,
+                           size_t *totallen, int *overflow) {
+   size_t exp_length = strlcat(buf, src, bufsize);
+
+
+   if (exp_length >= bufsize) {  // overflow happened
+       if (*overflow) {
+           *totallen += strlen(src);
+       } else {
+           *totallen = exp_length;
+       }
+       *overflow = 1;
+   } else {
+       *totallen = exp_length;
+   }
+
+
+   return exp_length;
+}
+
+
+Consider how you implemented padding in printf. Padding applies across all format specifiers with some slight differences. Does your printf handle all of the padding in one unified code path? If not, tell us how you wrote it and how you could go about unifying the code. Please include some specific lines of code you would change.
+
+
+My padding in printf is not very unified and is separate for each type of format printing. I think that in the printf module that there is a lot of repetition in how I implement padding, which is during every type: char, decimal, string, etc. It is currently implemented like this for every single if statement: 
+if(negwidth == 0){ // if positive pad to the left
+                       for( int j = 0; j<npadding +strlen(new); j++){
+                           if(j < npadding){
+                               result[j] = ' '; // leading space padding
+                           }
+                           else{
+                               result[j] = new[j - npadding];   //copy the remaining sources
+                           }
+                       }         
+                   }
+                   else{ // if negative pad to the right
+                       for( int j = 0; j<npadding +strlen(new); j++){ 
+                           if(j < strlen(new)){
+                               result[j] = new[j]; // first append string
+                           }
+                           else{
+                              result[j] = ' '; // then append
+                           }
+                       }
+                   }
+If I added this to a padding function with the argument of padtype (whether space or 0’s) and the type of the new parameter, then the code would be a lot cleaner and shorter. 
+void pad_string(char *result, const char *src, int width, int negwidth) {
+int len = strlen(src);
+int npadding = (width > len) ? (width - len) : 0;
+
+
+if (negwidth == 0) { // right-aligned (pad left)
+for (int j = 0; j < npadding; j++) {
+result[j] = ' ';
+}
+for (int j = 0; j < len; j++) {
+result[npadding + j] = src[j];
+}
+} else { // left-aligned (pad right)
+for (int j = 0; j < len; j++) {
+result[j] = src[j];
+}
+for (int j = 0; j < npadding; j++) {
+result[len + j] = ' ';
+}
+}
+
+
+result[len + npadding] = '\0'; // null terminate
+}
+
+
+
+
+Processing a printf format specifier is simplified by implementing a series of steps, rather than aiming to go from start to finish in one pass and in-place. For example, for format specifier %8d, you might first process the digits from right to left and write to a temporary buffer in backward order, then copy them out in reverse. A follow-up step applies padding and another pass copies to the final output string and truncates. This approach makes a couple of extra passes when compared to a version that aimed to write the final characters to the output string in one go; a big-O of perhaps O(4n) instead of O(n). Explain the advantages of the stepwise, layered approach and why optimizing into a single pass would likely cost much more than any benefit it provided.
+
+The stepwise layered approach makes it clear of the steps of converting the value into a string, then applying formatting like padding or alignment, and copying into the output buffer with truncation. This way it is easier to debug and identify where the issue is. This way it is also easier to keep track of the memory allocated. The difference in O(Notation) is not significant, as it is only scaled linearly and not exponential, not worth the code complexity. With this model, we would have to predict widths, manage alignment while still generating digits, and handle edge cases like truncation and buffer limits all at once. This leads to high maintenance code, more duplication, and a higher risk of subtle bugs. In practice, the clarity and correctness of the layered approach far outweigh the slight fast gain of a quick implementation.
+
+
+By now, you have first-hand experience of how unsafe C is about memory and pointers. Consider the function strlen as an example of a function that is inherently unsafe. What happens when a client calls strlen with a pointer that is invalid or does not point to a well-formed C-string?
+4.b Now take a look at the specification for the function [strnlen](https://man7.org/linux/man-pages/man3/strnlen.3.html). Tell us how using strnlen can be safer than strlen. Does it fix all of the problems with strlen?
+
+When a client calls strlen with an invalid pointer or a pointer that does not refer to a properly null-terminated C string, the function will keep reading memory until it happens to find a '\0'. If the pointer is invalid, then there will be a segmentation fault. If the pointer is valid but the string is not null-terminated, strlen will read past the intended buffer into unrelated memory which will cause unpredictable outcomes. Strnlen is safer because it introduces a maximum length it will examine at most n bytes and stop early if no null terminator is found. This prevents it from scanning arbitrarily far past the buffer, reducing the risk of overreading large regions of memory. It doesn’t fix ALL problems but it helps. Some problems that remain are if the pointer itself is still invalid, then it will crash 
+
