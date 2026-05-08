@@ -12,6 +12,7 @@
 #include "strings.h"
 #include "mango.h"
 #include "printf.h"
+#include "strings.h"
 #include "symtab.h"
 
 
