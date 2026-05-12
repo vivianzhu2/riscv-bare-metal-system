@@ -1,1 +1,93 @@
-// Style reflection submitted with assign5
+You should feel very proud having printf and now malloc under your belt! We find that one of the best ways to grow as programmers is to take the time to review our code with a critical (but kind!) eye. 
+Now that the dust has settled on printf, go back and look at how you did and what you could improve on. We provide a simple rubric below, review your strings.c and printf.c and tell us where you land on the rubric for each row. 
+Feel free to add further reflections here as well. We are looking for your honest evaluation and want to be clear that the assessment you give yourself is not your grade :-)
+
+Character handling: I give myself an okay because I use inclusive range and char constants rather than ASCII values
+to tell about whether it is a digit or a hex or a string. However, I have not used extensive use of functions
+isdigit and is hexdigit and convertin to lower in my code. 
+
+Number processing: I give myself an okay because in num_to_string, I take advantage of using a single code path for processing digits right to left with div/mod operators. 
+However, in my strtonum operation, I use the switch case or if-else case for each step of the next input, 0 then x or d? then the input? 
+Therefore, the average of both of these is an okay!
+
+Code Unification: I give myself a needs improvement because I implement the decimal and hex separate from each other in both functions, 
+separating by type with distinct loops in strtonum and separate if statements in num_to string.
+
+Code reuse: I give myself an okay because I use strlen to account for the length of the string so not reuisng the code. 
+However, I do not use memcpy to copy the contents. Instead, I create my own algorithm. 
+
+Code reuse snprintf: I give myself an okay because strlcat and strtonum are big components of my code to find the length and concatenate the existing buffer with the padding. 
+I also use strtonum to transfer the decimal numbers into strings without reimplementing. Hwever, I do not use memset to create padding bytes: I use my own algorithm with a loop, but I'm
+realizing that this could be more efficient with memset. 
+
+Describe what test cases you used to confirm the padding features of printf. Tell us why a similar testing strategy would not work well for testing malloc, include at least one concrete example to make your point.
+Printf tests:
+    buf[0]='\0';
+    snprintf(buf, 20, "A %p", (void*)0x890AB);
+    assert(snprintf(buf, 20, "A %p", (void*)0x890AB)==12);
+    assert(strcmp(buf,"A 0x000890ab")==0);
+
+    assert(snprintf(buf, 6, "A %9p", (void*)0x890AB)==13);
+    assert(strcmp(buf,"A 0x0")==0);
+    buf[0]='\0';
+These black box tests make it clear for the user to know which is the correct output and match it up with the program. For printf, this is necessary and needed because 
+if the outcome is right, then so is the algorithm. We don't have to worry about the backgrounds of memory allocation . Once you put an input, it will return whether it is true or false. 
+I tried this for both a buffer that was too big and too small, which is still judged on the outputted answer. 
+malloc black box: 
+    void *p = malloc(20);
+    assert(p == 0x20000000);  
+    assert(strcmp(p, "hello") == 0); 
+We dont know the output here, and it could vary each time you run it depending on the changes in the heap. We can only tell whether it is null or not, which does not give us that much information. 
+
+
+We talk about clear box testing versus black box testing. Describe a single clear box test case to verify/observe malloc recycling. Explain what this test confirms and what it doesn't confirm. Then tell us about what other test cases would be needed for confident coverage.
+
+
+void *a = malloc(64);
+free(a);
+void *b = malloc(32);
+
+A single clear box test for recycling would be to malloc a block, save its address, free it, then malloc the same size again and assert the returned address matches the saved one. 
+This confirms that malloc is reusing the freed block rather than always extending the heap with sbrk.  However this test is very narrow and only confirms recycling works for the exact same size request in isolation with no other allocations in between. 
+To get confident coverage you would need additional tests: freeing a large block then mallocing something smaller into it, freeing two adjacent blocks and mallocing something that only fits in the combined space, and interleaving many mallocs and frees to ensure recycling still works when the heap is split. 
+Each one would need to elaborate on a specific memory address. It does not confirm that a smaller request can fit into a larger freed block, that the leftover memory after a smaller allocation is still usable. 
+
+Consider our provided heap_workflow.c program. Read through the code and take the time to understand how it works. The function makes 4 different calls to report_problem, each one is detecting a different type of problem with your malloc implementation. Tell us what the 4 different problems are and how the workflow program is able to detect each. (Note you will have to dig a bit deeper than just the printout that each report gives). We are looking for a concrete explanation for each of the 4 cases.
+
+1. It checks for misaligned addresses by modulating it by 8. If it is anything but 0, it will report a problem. 
+    if (((uintptr_t)block->ptr) % ALIGNMENT != 0) {
+        report_problem("New block (%p) not aligned to %d bytes", block->ptr, ALIGNMENT);
+    }
+    This verifies that the block address has to follow the alignment so that it can preserve the uintptr_t type. The test casts the pointer to uintptr_t (an integer type large enough to hold a pointer) so it can do arithmetic on the raw address. 
+
+2.  Block outside heap bounds:
+    if (block->ptr < sim->seg_start || block_end > sim->seg_end) {
+        report_problem("New block (%p:%p) not within heap segment (%p:%p)",
+                        block->ptr, block_end, sim->seg_start, sim->seg_end);
+    }
+     This catches cases where your malloc returns a garbage pointer. It keeps track of the heap start: sbrk(0) and the heap end, where the current pointer is. 
+    If the pointer is beyond the range of heapstart and heap end, then they return a problem. This could be due to not intiializing sbrk(0) correctly or garbage pointers.
+
+3. Block overlaps existing block 
+        if ((block->ptr >= other_start && block->ptr < other_end) || (block_end > other_start && block_end < other_end) ||
+            (block->ptr < other_start && block_end >= other_end)) {
+            report_problem("New block (%p:%p) overlaps existing block (%p:%p)",
+                            block->ptr, block_end, other_start, other_end);
+        }
+
+    This catches the bug where malloc tries to give free memory twice after free. It keeps track of an array block and that its range is within an existing block. 
+    To prevent this, we have to mark the blcok as free after malloc and then taken when it is no longer free.
+4. Payload Data: 
+    if (*cur != byte) {
+                    report_problem("invalid payload data at offset %d of block at address %p", \
+                        j, sim->blocks[i].ptr);
+                }
+    This specifically goes through the blocks and verifies that thye have the correct value. There shouldn't be any bytes that are changed, or else it is a memory leak. 
+
+We like our heap workflow as a test program; it tends to turn up a lot of bugs not caught earlier. If you experienced this yourself, tell us about the bug(s) it surfaced and how it managed to catch those bugs where your other tests did not. If you didn't have this experience and it did not catch any bugs for you, then reflect on why this test provides more confidence about the correctness of your allocator than test cases like those you wrote for assign2 and assign3. Give at least two specific reasons why.
+
+When we tested our heap workflow test program, it ended up not working at first because 
+To fix this, I realized that I didn't account for the extra header memory, so I added +8 (size of the header) to two places: setting the memory of the block pointer and setting during verify payloads. 
+Heapworkflow as a test program is more effective because it relies on more clear box testing than black box testing, so focusing on the process and understanding of how to get there and
+every component is accurate rather than only confirming the output, which gives minimal information. This keeps track of the location of the actual pointer and the memory instead of only the address. 
+In addition, it runs 5000 random operations, so we know that it is very robust and is bound to capture some mistake in the code through many iterations. 

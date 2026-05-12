@@ -1,6 +1,6 @@
 /* File: test_keyboard_shell.c
  * ---------------------------
- * ***** TODO: add your file header comment here *****
+ * test program with unit tests.    
  */
 #include "assert.h"
 #include "keyboard.h"
@@ -9,7 +9,7 @@
 #include "strings.h"
 #include "uart.h"
 #include "timer.h"
-
+#include "mango.h"
 #define ESC_SCANCODE 0x76
 
 static void test_keyboard_scancodes(void) {
@@ -56,19 +56,85 @@ static void test_keyboard_chars(void) {
     printf("\nDone with key chars test.\n");
 }
 
+
+
 static void test_keyboard_assert(void) {
     char ch;
     printf("\nHold down Shift and type 'g'\n");
     ch = keyboard_read_next();
     assert(ch == 'G');  // confirm user can follow directions and correct key char generated
+ 
 }
 
+// This is a more comprehensive unit test of the keyboard_read_next function that tests all the modifiers and their interactions with each other.
+static void test_keyboard_assert_unit(void) {
+    char ch;
+    printf("\nHold down left Shift and type 'g'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'G');  // confirm user can follow directions and correct key char generated
+    printf("\nHold down right Shift and type 'g'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'G');  // confirm user can follow directions and correct key char generated        
+    ///
+    printf("\nPress CapLock once and type 'a'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'A');  // confirm user can follow directions and correct key char generated
+
+    printf("\nPress CapLock again and type 'g'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'g');  // confirm user can follow directions and correct key char generated
+
+    printf("\nHold down left Ctrl and type 'h'\n");
+    ch = keyboard_read_next();
+    assert(ch == '\b');  // confirm user can follow directions and correct key char generated
+    printf("\nHold down right Ctrl and type 'h'\n");
+    ch = keyboard_read_next();
+    assert(ch == '\b');  // confirm user can follow directions and correct key char generated
+
+    printf("\nHold down left Alt and type 'z'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'z');  // confirm user can follow directions and correct key char generated
+    printf("\nHold down right Alt and type 'z'\n");
+    ch = keyboard_read_next();
+    assert(ch == 'z');  // confirm user can follow directions and correct key char generated
+
+}
+ 
 static void test_shell_evaluate(void) {
     shell_init(keyboard_read_next, printf);
 
     printf("\nTest shell_evaluate on fixed commands.\n");
     int ret = shell_evaluate("echo hello, world!");
     printf("Command result is zero if successful, is it? %d\n", ret);
+
+
+
+}
+
+//  This is a unit test function that uses the shell_evaluate function to turn on the blue LED. 
+static void test_shell_evaluate_blue_led_on(void) {
+    shell_init(keyboard_read_next, printf);
+
+///
+    printf("\nTest shell_evaluate on fixed poke commands to turn on and off the blue LED!.\n");
+    int ret = shell_evaluate("poke 0x20000a0 0x40000");
+    printf("Command result is zero if successful, is it? %d\n", ret);
+    printf("Blue LED is turned ON, is it?\n");
+
+
+}
+
+//  This is a unit test function that uses the shell_evaluate function to turn off the blue LED. 
+static void test_shell_evaluate_blue_led_off(void) {
+    shell_init(keyboard_read_next, printf);
+
+///
+    printf("\nTest shell_evaluate on fixed poke commands to turn on and off the blue LED!.\n");
+    int ret = shell_evaluate("poke 0x20000a0 0");
+    printf("Command result is zero if successful, is it? %d\n", ret);
+    printf("Blue LED is turned OFF, is it?\n");
+
+
 }
 
 // This is an example of a "mock" input used for testing. When asked to read
@@ -107,6 +173,31 @@ static void test_shell_readline_keyboard(void) {
     shell_readline(buf, bufsize);
 }
 
+// This is an example of a "mock" input used for testing the shell command poke to turn on/ off the blue LED.
+static char read_fixed_blue_led(void) {
+    const char *input = "poke 0x20000a0 0x40000\npoke 0x20000a0 0\n";
+    static int index = 0; // note declared static
+
+    char next = input[index];
+    index = (index + 1) % strlen(input);
+    return next;
+}
+
+
+// This is an example of a "mock" input used for testing the shell command poke to turn on/ off the blue LED.
+static void test_shell_readline_fixed_input_blue_led(void) {
+    char buf[80];
+    size_t bufsize = sizeof(buf);
+
+    shell_init(read_fixed_blue_led, printf); // input is fixed sequence of characters
+
+    printf("\nTest shell_readline, feed chars from fixed poke ledstring as mock input.\n");
+    printf("readline> ");
+    shell_readline(buf, bufsize);
+    printf("readline> ");
+    shell_readline(buf, bufsize);
+}
+
 void main(void) {
     uart_init();
     keyboard_init(KEYBOARD_CLOCK, KEYBOARD_DATA);
@@ -116,7 +207,7 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    test_keyboard_scancodes();
+    // test_keyboard_scancodes();
     // test_keyboard_sequences();
     // test_keyboard_events();
     // test_keyboard_chars();
@@ -125,7 +216,12 @@ void main(void) {
     // test_shell_readline_fixed_input();
     // test_shell_readline_keyboard();
 
-    /***** TODO: Add more and better tests!  *****/
+
+    // test_keyboard_assert_unit();   // X
+    // test_shell_readline_fixed_input_blue_led();
+    test_shell_evaluate_blue_led_on();
+    // test_shell_evaluate_blue_led_off();  
+ 
 
     printf("Finished executing main() in test_keyboard_shell.c\n");
 }
