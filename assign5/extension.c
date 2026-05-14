@@ -13,6 +13,7 @@ int shell_evaluate(const char *line)
 #include "strings.h"
 #include "mango.h"
 #include "printf.h"
+#include "ps2_keys.h"
 #define LINE_LEN 80
 
 // Module-level global variables for shell
@@ -21,9 +22,9 @@ static struct {
     formatted_fn_t shell_printf;
 } module;
 
-const char* history [10][128];
-int n = 0;
-
+char history [10][128];
+int n_cmd = 0;
+int nhistory = 0;
 
 // NOTE TO STUDENTS:
 // Your shell commands output various information and respond to user
@@ -39,14 +40,15 @@ int n = 0;
 //
 // Your graders thank you in advance for taking this care!
 
-
+static int cmd_history(int argc, const char* argv[]);
 static const command_t commands[] = {
     {"help",  "help [cmd]",  "print command usage and description", cmd_help},
     {"echo",  "echo [args]", "print arguments", cmd_echo},
     {"clear", "clear",       "clear screen (if your terminal supports it)", cmd_clear},
     {"reboot", "reboot",       "reboot the Mango Pi", cmd_reboot},
     {"peek", "peek [addr]",       "print contents of memory at address", cmd_peek},
-    {"poke", "poke [addr] [val]",       "store value into memory at address", cmd_poke}
+    {"poke", "poke [addr] [val]",       "store value into memory at address", cmd_poke},
+    {"history", "history",       "keeps track of all the past commands", cmd_history}
 };
 
 // Implementations of shell echo command
@@ -61,7 +63,7 @@ int cmd_echo(int argc, const char *argv[]) {
 // Implementations of shell help command
 int cmd_help(int argc, const char *argv[]) {
     if(argc == 1){ // if no command is specified, print usage and description for all commands
-        for(int i = 0; i<6; i++){
+        for(int i = 0; i<7; i++){
             module.shell_printf("%-19s%s\n",commands[i].usage, commands[i].description);
         }
         
@@ -70,7 +72,7 @@ int cmd_help(int argc, const char *argv[]) {
         command_t command;
         command.name = argv[1];
         int found = 0;
-        for(int i = 0; i<6; i++){
+        for(int i = 0; i<7; i++){
             if(strcmp(command.name, commands[i].name) == 0){ // if the command is found, print its usage and description
                 found = 1;
                 module.shell_printf("%-19s%s\n",commands[i].usage, commands[i].description);
@@ -152,17 +154,17 @@ int cmd_peek(int argc, const char* argv[]) {
 int cmd_history(int argc, const char* argv[]) {
     int log = 0;
     if (argc == 1) {
-        log = 10;
+        log = nhistory;
     } else if (argc == 2) {
-        log = strtonum(argv[1]);
-        if (log > 10) log = 10;
+        log = strtonum(argv[1], NULL);
+        if (log > nhistory) log = nhistory;
     } else {
         module.shell_printf("error: history expects 1 argument [num]\n");
         return 1;
     }
 
     for (int i = 0; i < log; i++) {
-        int idx = (n - log + i + 10) % 10;
+        int idx = (n_cmd - log + i + 10) % 10;
         module.shell_printf("%d  %s\n", i + 1, history[idx]);
     }
     return 0;
@@ -236,23 +238,37 @@ void shell_bell(void) {
 
 void shell_readline(char buf[], size_t bufsize) {
     int length = 0;
-    static int history_idx = 0;
+    int history_idx = n_cmd;
 
     char c = module.shell_read();
-
+    int n_up = 0;
     while (c != '\n') {
-        else if (c == '\x80') {  // up arrow — go back in history
-            history_idx = (history_idx - 1 + 10) % 10;
-            // erase current line
-            for (int i = 0; i < length; i++) {
-                module.shell_printf("%c", '\b');
-                module.shell_printf(" ");
-                module.shell_printf("%c", '\b');
+        if (c ==  PS2_KEY_ARROW_UP) {  // up arrow — go back in history
+
+            // printf("n_up: %d nhistory: %d\n" , n_up, nhistory);
+            if(n_up < nhistory){
+                n_up++;
+    
+                // erase current line
+                for (int i = 0; i < length; i++) {
+                    module.shell_printf("%c", '\b');
+                    module.shell_printf(" ");
+                    module.shell_printf("%c", '\b');
+                }
+
+                
+                memcpy(buf, history[history_idx - 1], bufsize);
+                // printf("buf: %s n_cmd: %d\n" , buf, history_idx);
+                // for (int i = 0; i < 10; i++) {
+                //     printf("%d: %s\n", i, history[i]);
+                // }
+                history_idx -= 1;
+                length = strlen(buf);
+                module.shell_printf("%s", buf);
             }
-            strlcpy(buf, history[history_idx], bufsize);
-            length = strlen(buf);
-            module.shell_printf("%s", buf);
         }
+        // when it reaches top, stop at the first history
+        
         else if (c == '\b') {
             if (length < 1) {
                 shell_bell();
@@ -263,17 +279,24 @@ void shell_readline(char buf[], size_t bufsize) {
                 module.shell_printf("%c", '\b');
             }
         }
-        else if (c == '\x81') {  // down arrow — go forward in history
-            history_idx = (history_idx + 1) % 10;
-            // erase current line
-            for (int i = 0; i < length; i++) {
-                module.shell_printf("%c", '\b');
-                module.shell_printf(" ");
-                module.shell_printf("%c", '\b');
+        else if (c ==  PS2_KEY_ARROW_DOWN) {  // down arrow — go forward in history
+            
+            if(n_up <= nhistory && n_up >=0){
+                // printf("nup: %d \n", n_up);
+                n_up--;
+
+                history_idx = (history_idx + 1) % 10;
+                // erase current line
+                for (int i = 0; i < length; i++) {
+                    module.shell_printf("%c", '\b');
+                    module.shell_printf(" ");
+                    module.shell_printf("%c", '\b');
+                }
+                memcpy(buf, history[history_idx], bufsize);
+                length = strlen(buf);
+                module.shell_printf("%s", buf);
             }
-            strlcpy(buf, history[history_idx], bufsize);
-            length = strlen(buf);
-            module.shell_printf("%s", buf);
+            //  first down key needs to be pressed twice: fix
         }
         else if (length > bufsize - 1) {
             shell_bell();
@@ -292,7 +315,6 @@ void shell_readline(char buf[], size_t bufsize) {
     }
     buf[length] = '\0';
     module.shell_printf("\n");
-    history_idx = n;
 }
 // A helper function to check if a character is a whitespace character (space, tab, or newline). This is used for tokenizing the input line into commands and arguments.
 static bool isspace(char ch) {
@@ -316,10 +338,13 @@ int shell_evaluate(const char *line) {
     int max = strlen(line);
     const char *tokens[max];
 
-    strlcpy(history[n], line, 128);
-    module.shell_printf(history[n]);
-    n = (n + 1) % 10;
-    n+=1;
+    memcpy(history[n_cmd], line, 128);
+    // module.shell_printf("history: %s",history[n_cmd]);
+    if(nhistory < 10){
+        nhistory ++;
+    }
+    n_cmd = (n_cmd + 1) % 10;
+    // n+=1;
     int ntokens = 0;
     const char *cur = line;
 
