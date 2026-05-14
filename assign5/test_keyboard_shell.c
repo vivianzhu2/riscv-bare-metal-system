@@ -75,7 +75,6 @@ static void test_keyboard_assert_unit(void) {
     printf("\nHold down right Shift and type 'g'\n");
     ch = keyboard_read_next();
     assert(ch == 'G');  // confirm user can follow directions and correct key char generated        
-    ///
     printf("\nPress CapLock once and type 'a'\n");
     ch = keyboard_read_next();
     assert(ch == 'A');  // confirm user can follow directions and correct key char generated
@@ -215,11 +214,11 @@ void main(void) {
     // test_shell_evaluate();
     // test_shell_readline_fixed_input();
     // test_shell_readline_keyboard();
+// 
 
-
-    // test_keyboard_assert_unit();   // X
+    test_keyboard_assert_unit();   // X
     // test_shell_readline_fixed_input_blue_led();
-    test_shell_evaluate_blue_led_on();
+    // test_shell_evaluate_blue_led_on();
     // test_shell_evaluate_blue_led_off();  
  
 

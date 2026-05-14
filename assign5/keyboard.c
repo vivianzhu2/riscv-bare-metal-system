@@ -99,8 +99,7 @@ key_event_t keyboard_read_event(void) {
     static int isCapsLock = 0;
 
 
-
-
+while((id != 0 && id<=0x93 && id>=0x90)) { // if the key is a modifier, update the modifiers state and read another sequence until we get a non-modifier key
 
     if(id == PS2_KEY_SHIFT && sequence.what == KEY_PRESS){ // shift is pressed down
         mods |= KEYBOARD_MOD_SHIFT; 
@@ -152,61 +151,17 @@ key_event_t keyboard_read_event(void) {
         }
 
     }
-    
-    if( id ==0 || id>93){ // if the key is not a modifier, return the event with modifiers updated
+        sequence =keyboard_read_sequence();
+        keyChar = ps2_key_for_scancode(sequence.scancode, sequence.extended);
+        id = keyChar.id;
+}  
+    if( id ==0 || id>0x93){ // if the key is not a modifier, return the event with modifiers updated
         event.action = sequence;
         event.key = keyChar;
         event.modifiers = mods;
         return event;
     }
-    while(sequence.what == KEY_RELEASE && (keyChar.id != 0 && keyChar.id<=93)){ // if the key is a modifier and the sequence is a release, keep reading until we get a press for a non-modifier key
-        sequence =keyboard_read_sequence();
-        keyChar = ps2_key_for_scancode(sequence.scancode, sequence.extended);
-        id = keyChar.id;
-        if(id == PS2_KEY_SHIFT && sequence.what == KEY_PRESS){
-            mods |= KEYBOARD_MOD_SHIFT; 
-            // printf("next %x \n",nextId);
-        }
-        else{
-            if(sequence.what == KEY_RELEASE && id == PS2_KEY_SHIFT){ // shift is released
-                mods &= ~KEYBOARD_MOD_SHIFT;
-                
-            }
-    
-        }
-        if(id == PS2_KEY_ALT && sequence.what == KEY_PRESS){
-            mods |= KEYBOARD_MOD_ALT; 
-            // printf("next %x \n",nextId);
-        }
-        else{
-            if(sequence.what == KEY_RELEASE && id == PS2_KEY_ALT){ // alt is released
-                mods &= ~KEYBOARD_MOD_ALT;
-                
-            }
-    
-        }
-        if(id == PS2_KEY_CTRL && sequence.what == KEY_PRESS){
-            mods |= KEYBOARD_MOD_CTRL; 
-            // printf("next %x \n",nextId);
-        }
-        else{
-            if(sequence.what == KEY_RELEASE && id == PS2_KEY_CTRL){ // ctrl is released
-                mods &= ~KEYBOARD_MOD_CTRL;
-                
-            }
-    
-        }
-    }
-
-    key_action_t next =keyboard_read_sequence(); // read one more sequence to get the key that was acted upon, this will be a press for a non-modifier key
-    ps2_key_t nextChar = ps2_key_for_scancode(next.scancode, next.extended);
-    
-
   
-    event.modifiers = mods;
-    event.action = next;
-    event.key = nextChar;
-
 
     return event;
 }
@@ -250,7 +205,7 @@ char keyboard_read_next(void) {
     else if((modify & KEYBOARD_MOD_CTRL) != 0 && event.action.what == KEY_PRESS){ // if ctrl is pressed, return the control character if it exists, otherwise return the unshifted character or id
         if(charkey.id == 0x0 ){
             if(charkey.ch >= 97 && charkey.ch <= 122){ // if the character is a letter, return the corresponding control character
-                
+                //printf("ctrl next: %x  modify: %d  what: %d \n", charkey.ch -96, modify, event.action.what);
                 return charkey.ch - 96;
             }
             else{ // if the character is not a letter, return the unshifted character
