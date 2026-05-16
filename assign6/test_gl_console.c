@@ -19,7 +19,6 @@ static void pause(const char *message) {
     uart_putchar('\n');
 }
 
-
 static void test_fb(void) {
     const int SIZE = 500;
     fb_init(SIZE, SIZE, FB_SINGLEBUFFER); // init single buffer
