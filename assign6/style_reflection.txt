@@ -1,1 +1,55 @@
 // Style reflection submitted with assign6
+1. One challenge when designing a module is striking a good balance between building in flexibility for anticipated future use cases versus a simpler design that fits exactly and only what is needed today. 
+Consider the assign 5 keyboard module. Tell us what code changes would be needed to support a different keymap like Dvorak. How much work would be required to add support for other modifiers, e.g alt-letter or combos of existing modifiers? 
+Identify an extended feature the current design does not seem to anticipate and how you would change the design to better accommodate it.
+
+For a keymap like Dvorak, the majority of the changes would be in the ps2_key_for_scancode inside ps2_keys.c.  This is the function that converts all the scancodes into the associated characters and shifted characters.
+Dvorak would need a new keymap function where each of the characters and ids would be mapped to a different scan code. The overall keyboard code would stay the same. 
+If needed to add combos of new modifiers, I could add separate if statements that allow other keys to become modifiers and change the scan code. If I  added combos of modifiers, I would have to change the bitwise operations to if ((modify & KEYBOARD_MOD_SHIFT) && (modify & KEYBOARD_MOD_CTRL)) {
+ instead, because my current implementation only keeps track of the last held down modifier. To identify a extended feature the design doesnt anticipate, I'd need to add a timer
+ adds interrupts so that the whole system doesnt just freeze, but returning a predictable char. 
+
+2. Read one or both of the short readings below introducing design patterns. Pick a pattern from the reading that you find interesting and explain it to us. Give us an example of how you would use this pattern and why it would be useful. Include a pseudocode example.
+
+In the flyweight design pattern, it relies on two objects: the main object with most of the backbone and structure of each of the objects, and then the individual objects that are variations of the main object with characteristics like color or size or type. This 
+class OutfitModel
+{
+private:
+  Clothing shirt;
+  Clothing pants;
+  Clothing shoes;
+};
+This clothes example represents the flyweight design pattern because the fundamental outfit structure doesnt change, but the design of the clothes can. Like the individual shirt, pants, and shoes are customizable in the individual trees, but
+in the overall structure, the general ones are defined by a main pattern. Every outfit has these components, and this encapsulates all of the outfits, so it only needs to be declared once. 
+
+class Outfit
+{
+private:
+  Texture* cotton;
+  String weather;
+  Category Occasion;
+  int Casual;
+}; 
+
+This instantiates each individual outfit, by ranking how dressy it is, when it is suitable to wear, if it is according to the temperature, and also the material of the clothing articles. 
+This is unique to each outfit and can be personalized by the user by referring to the model but customizing to these attributes. 
+
+
+3. Function pointers are a pretty neat concept, they allow us to treat functions as data, flexibly manage control flow, and attach operations to data, such as is used for objects and methods in OOP. This is powerful stuff! Imagine adding a bind command to to your shell that allows binding shell functions to shortcuts, e.g., the command bind help h would make shortcut h execute the help command. Tell us how you could leverage function pointers to implement this feature.
+Bind h could use function pointers  when creating a table that matches the function pointers to their shortcut keys so it is easy to access where the short cut keys are because the function pointers are pointing there. 
+So Bind h would just call the help command, because they can access that pointer in memory. Since a function pointer treats functions as data, it makes it very easy to manipulate and move the value around  and pass it as an argument. And by attaching
+operations to data, it lets it become part of a struct that can be connected to specific commands in the terminal. 
+
+4.
+a. Diagramming as a finite state machine can be a good tool when designing the implementation of a logically complex operation. If you are unfamiliar with finite state machines or need a refresher, check out these resources:
+
+Wikipedia entry gives a brief overview and some useful examples
+CS103 lecture introducing Finite Automata is a theoretical treatment that goes into more depth
+Break out your pencils and diagram a finite state machine for your ps2_read function. Make sure to show separate transitions for each failed check (timing, start, parity, stop). We aren't going to be pedantic about getting a perfect FSM here so don't stress over that, mostly correct is good enough. Take a photo of your FSM diagram and add and commit it to your repo.
+
+Added in the github
+b. Tell us what design insights you are able to glean from your FSM diagram. Think about how you would write ps2_read if you were handed just this diagram and no write up. How would that implementation differ from your current implementation?
+
+I think the FSM diagram would let the reader to approach each scan code bit by bit, to measure each of the 8 bits and make sure to check for 0 and 1 in the start bit. The parity appears like it would be a series of if statements wiht the overall count of the amount of ones and comparing to the current parity bit. 
+I think it would be quite similar to my current implementation because that is the way I thought about it as well. The FSM diagram also shows the one possible accepting state 
+which is if all bits are accurate. 

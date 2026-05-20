@@ -1,1 +1,3 @@
 Include information for grader about your assign6 here
+Finished assignment 6!! Added tests to both console,gl, and fb.
+I'm also very sorry this is 15 minutes late from the early deadline. I was locked out of a CODA classroom for two hours after class because I went to the bathroom and I left my items in there. I was wondering if it is okay to still have the ontime bonus, I totally understand if not!!
