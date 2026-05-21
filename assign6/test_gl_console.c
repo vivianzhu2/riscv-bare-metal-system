@@ -94,8 +94,11 @@ static void test_gl(void) {
     // gl_draw_char(170, 50, 'V', GL_WHITE);
     // gl_swap_buffer();
     pause("Now displaying 1280 x 720, purple bg, single green pixel, blue center rect, amber letter A");
-
-
+    /* Test: form feed in gl_draw_string should clear the screen and move cursor to top-left.
+     * Draw some text at an offset, then issue a string containing a form feed followed by
+     * a single character. After swapping, the previous text location should be cleared
+     * (background color) and the character should appear at the top-left pixel(s).
+     */
     const uint32_t BG_COLOR = gl_color(0x55, 0, 0x55); // same purple bg used above
     /* ensure background is set and visible */
 

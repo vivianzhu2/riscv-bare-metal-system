@@ -42,9 +42,7 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
     module.line_height = gl_get_char_height() + LINE_SPACING;
     module.fg_color = foreground;
     module.bg_color = background;
-   
-
-
+    
 
 
     // initialize text contents to empty
