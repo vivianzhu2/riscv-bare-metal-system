@@ -269,7 +269,83 @@ static void test_snprintf(void) { // snprintf tests are in test_printf.c
     memset(buf, 0x7e, bufsize); // for debug, init array contents with fixed repeat value
 
     // // No formatting codes
-    // printf("Hello, world!");
+    printf("Hello, world!");
+    snprintf(buf, 10, "%x", 0x9abcdef0);  //ag_assertion failed: dst contents should be |9abcdef0|
+    assert(strcmp(buf, "9abcdef0") == 0);
+    snprintf(buf, 20, "%x", 0xffffffff);  //ag_assertion failed: dst contents should be |ffffffff|
+    assert(strcmp(buf, "ffffffff") == 0);
+
+    snprintf(buf, 20, "%12s", "stanford");//  ag_assertion failed: dst contents should be |    stanford|
+    assert(strcmp(buf, "    stanford") == 0);
+    snprintf(buf, 20, "%4s", "stanford");  // ag_assertion failed: dst contents should be |stanford|
+    assert(strcmp(buf, "stanford") == 0);
+    snprintf(buf, 20, "%4c", 'Z'); //  ag_assertion failed: dst contents should be |   Z|
+    assert(strcmp(buf, "   Z") == 0);
+    snprintf(buf, 20, "%1c", 'Z');  // ag_assertion failed: dst contents should be |Z|
+    assert(strcmp(buf, "Z") == 0);
+    snprintf(buf, 20, "%2d", 987);  // ag_assertion failed: dst contents should be |987|
+    assert(strcmp(buf, "987") == 0);
+    snprintf(buf, 20, "%5d", 365);  // ag_assertion failed: dst contents should be |  365|
+    assert(strcmp(buf, "  365") == 0);
+    snprintf(buf, 20, "%9ld", -100L);  // ag_assertion failed: dst contents should be |     -100|
+    assert(strcmp(buf, "     -100") == 0);
+    snprintf(buf, 20, "%2x", 0x107e);  // ag_assertion failed: dst contents should be |107e|
+    assert(strcmp(buf, "107e") == 0);
+    snprintf(buf, 20, "%8x", 0xa01c); // ag_assertion failed: dst contents should be |0000a01c|
+    assert(strcmp(buf, "0000a01c") == 0);
+
+
+
+
+    snprintf(buf, 20, "%p", (void *)0x1badf00d);  //ag_assertion failed: dst contents should be |0x1badf00d|
+    assert(strcmp(buf, "0x1badf00d") == 0);
+    snprintf(buf, 20, "%p", (void *)0x100200300400L); // ag_assertion failed: dst contents should be |0x100200300400|
+    assert(strcmp(buf, "0x100200300400") == 0);
+    snprintf(buf, 20, "%6p", (void *)0x72f95);  //ag_assertion failed: dst contents should be |0x072f95|
+    assert(strcmp(buf, "0x072f95") == 0);
+    
+
+    snprintf(buf, 50, "%p: %2x %2x %2x %2x", (void *)0x40000000, 0, 10, 37, 48); // ag_assertion failed: dst contents should be |0x40000000: 00 0a 25 30|
+    assert(strcmp(buf, "0x40000000: 00 0a 25 30") == 0);
+    snprintf(buf, 50, "Yo %s%de%2c", "cs", 107, '!'); //  ag_assertion failed: dst contents should be |Yo cs107e !|
+    assert(strcmp(buf, "Yo cs107e !") == 0);
+
+    snprintf(buf, 5, "%6d", 2525); // ag_assertion failed: dst contents should be |  25|
+    assert(strcmp(buf, "  25") == 0);
+    snprintf(buf, 5, "%6d", -3636); // ag_assertion failed: dst contents should be | -36|
+    assert(strcmp(buf, " -36") == 0);
+
+    snprintf(buf, 0, "No room at the inn");
+    assert(strcmp(buf, "") == 0); // dst should not be modified when bufsize is 0
+    int ret_val = 0;
+    ret_val = snprintf(buf, 20, "%8s", "Hello"); // ag_assertion failed: ret_val should be 8, was 84
+    assert(ret_val == 8);
+    ret_val = snprintf(buf, 20, "%2d", 987);  //ag_assertion failed: ret_val should be 3, was 20
+    assert(ret_val == 3);
+    ret_val = snprintf(buf, 20, "%5d", -365); // ag_assertion failed: ret_val should be 5, was 50
+    assert(ret_val == 5);
+    ret_val = snprintf(buf, 20, "%2x", 0x107e); // ag_assertion failed: ret_val should be 4, was 20
+    assert(ret_val == 4);
+    ret_val = snprintf(buf, 20, "%8x", 0xa01c); // ag_assertion failed: ret_val should be 8, was 80
+    assert(ret_val == 8);
+    ret_val = snprintf(buf, 20, "%8c", 'Z'); // ag_assertion failed: ret_val should be 8, was 80
+    assert(ret_val == 8);
+    
+    ret_val = snprintf(buf, 20, "Yo %s%de%2c", "cs", 107, '!'); // ag_assertion failed: ret_val should be 11, was 29
+    assert(ret_val == 11);
+
+    ret_val = snprintf(buf, 3, "%8s", "Hello"); // ag_assertion failed: ret_val should be 8, was 84
+    assert(ret_val == 8);
+    ret_val = snprintf(buf, 3, "%2d", 987);  // ag_assertion failed: ret_val should be 3, was 20
+    assert(ret_val == 3);
+    ret_val = snprintf(buf, 3, "%5d", -365); // ag_assertion failed: ret_val should be 5, was 50
+    assert(ret_val == 5);
+    ret_val = snprintf(buf, 3, "%2x", 0x107e); // ag_assertion failed: ret_val should be 4, was 20
+    assert(ret_val == 4);
+    ret_val = snprintf(buf, 3, "%8x", 0xa01c); // ag_assertion failed: ret_val should be 8, was 80
+    assert(ret_val == 8);
+    ret_val = snprintf(buf, 3, "%8c", 'Z'); // ag_assertion failed: ret_val should be 8, was 80
+    assert(ret_val == 8);
 
     snprintf(buf, bufsize, "Hello, world!");
     assert(strcmp(buf, "Hello, world!") == 0);

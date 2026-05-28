@@ -1,4 +1,4 @@
-/* File: printf.c
+/* File: printf.c 
  * --------------
  * ***** TODO: add your file header comment here *****
  */
@@ -149,22 +149,22 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
             k= i + 1;
             negwidth = 0; // marker to see whether to pad on the left or the right
             star = 0; // marker to see whether to look for the next argument as field width
-            if(format[k] == '*'){
-                int arg = va_arg(args, int); //look for fieldwidth in separate arg
-                fw = arg;
-                if(arg<0){
-                    fw = -arg; 
-                    negwidth = 1; //preserve negativity padding
-                }
-                star = 1;
-                i++;
-            }
+            // if(format[k] == '*'){
+            //     int arg = va_arg(args, int); //look for fieldwidth in separate arg
+            //     fw = arg;
+            //     if(arg<0){
+            //         fw = -arg; 
+            //         negwidth = 1; //preserve negativity padding
+            //     }
+            //     star = 1;
+            //     i++;
+            // }
             if(star==0){
-                if(format[k] == '-'){
-                    negwidth = 1; 
-                    k++;                
-                }
-            
+                // if(format[k] == '-'){
+                //     negwidth = 1; 
+                //     k++;                
+                // }
+                tempfw[0] = '\0';
                 while(format[k] >= '0' && format[k] <= '9' && star == 0){
                     tempfw[k - i - 1 -negwidth] = format[k];// collect width digits into temp buffer
                     k++;
@@ -172,26 +172,30 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     
                 }
     
-                i = k-1;
+                
                 if (has_width==1) {
-                    tempfw[k] = '\0';
+                    tempfw[k - i - 1] = '\0';
                     fw = strtonum(tempfw, NULL); // convert collected digits to integer width
                 }
                 else {
                     fw=0;
                 }
+                i = k-1;
             }
 
 
             if(format[i + 1] == '%'){// case where %% becomes %
-                *new = '%';
-                new ++;
-                *new = '\0';
-                new--;
-                if(bufsize <= (strlen(buf) + strlen(new))){ //buffer check
-                    exp_length = strlcat(buf,new, bufsize);
+                // *new = '%';
+                // new ++;
+                // *new = '\0';
+                // new--;
+                char new2[2];
+                new2[0] = format[i+1];
+                new2[1] = '\0';
+                if(bufsize <= (strlen(buf) + strlen(new2))){ //buffer check
+                    exp_length = strlcat(buf,new2, bufsize);
                     if(overflow == 1){
-                        totallen += strlen(new); // already overflowed: accumulate manually
+                        totallen += strlen(new2); // already overflowed: accumulate manually
                     }
                     else{
                         totallen = exp_length;// first overflow: use strlcat return value
@@ -199,7 +203,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     overflow = 1;
                 }
                 else{ // no overflow yet: use strlcat return value
-                    exp_length = strlcat(buf,new, bufsize);
+                    exp_length = strlcat(buf,new2, bufsize);
                     totallen = exp_length;
                 }
                 i++;
@@ -207,42 +211,47 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
             else if(format[i + 1] == 'c'){ // %c becomes single character
                 char arg = (char)va_arg(args, int); // char is promoted to int in varargs
 
-                *new = arg;
-                new ++;
-                *new = '\0';
-                new--;
+                // *new = arg;
+                // new ++;
+                // *new = '\0';
+                // new--;
+
+                char new2[2];
+                new2[0] = arg;
+                new2[1] = '\0';
+
                 char result[fw+1];  // buffer for padded
                 // result[0] = '\0';       
                 int npadding = 0;
      
-                if( fw > strlen(new)){ // field width wider than character: pad with spaces
-                    npadding = fw - strlen(new);
+                if( fw > strlen(new2)){ // field width wider than character: pad with spaces
+                    npadding = fw - strlen(new2);
                     if(negwidth == 0){ // if positive pad to the left
-                        for( int j = 0; j<npadding +strlen(new); j++){
+                        for( int j = 0; j<npadding +strlen(new2); j++){
                             if(j < npadding){
                                 result[j] = ' '; // leading space padding
                             }
                             else{
-                                result[j] = new[j - npadding];   //copy the remaining sources
+                                result[j] = new2[j - npadding];   //copy the remaining sources
                             }
                         }          
                     }
                     else{ // if negative pad to the right 
-                        for( int j = 0; j<npadding +strlen(new); j++){  
-                            if(j < strlen(new)){
-                                result[j] = new[j]; // first append string
+                        for( int j = 0; j<npadding +strlen(new2); j++){  
+                            if(j < strlen(new2)){
+                                result[j] = new2[j]; // first append string
                             }
                             else{
                                result[j] = ' '; // then append
                             }
                         } 
                     }
-                    result[npadding + strlen(new)] = '\0';
-                    new = result;
-                    if(bufsize <= (strlen(buf) + strlen(new))){// buffer check for padded string
-                        exp_length = strlcat(buf,new, bufsize);
+                    result[npadding + strlen(new2)] = '\0';
+                    // new2 = result;
+                    if(bufsize <= (strlen(buf) + strlen(result))){// buffer check for padded string
+                        exp_length = strlcat(buf,result, bufsize);
                         if(overflow == 1){ // already overflowed: accumulate manually
-                            totallen += strlen(new);
+                            totallen += strlen(result);
                         }
                         else{
                             totallen = exp_length;
@@ -250,16 +259,16 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         overflow = 1;
                     }
                     else{ // no overflow yet: use strlcat return value
-                        exp_length = strlcat(buf,new, bufsize); // add the padded string to the original
+                        exp_length = strlcat(buf,result, bufsize); // add the padded string to the original
                         totallen = exp_length;
                     }
                 }
                 else{ // no padding needed
                     // exp_length = strlcat(buf,strarg, bufsize);
-                    if(bufsize <= (strlen(buf) + strlen(new))){ //buffer check
-                        exp_length = strlcat(buf,new, bufsize); 
+                    if(bufsize <= (strlen(buf) + strlen(new2))){ //buffer check
+                        exp_length = strlcat(buf,new2, bufsize); 
                         if(overflow == 1){ 
-                            totallen += strlen(new);
+                            totallen += strlen(new2);
                         }
                         else{ 
                             totallen = exp_length;
@@ -267,7 +276,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                         overflow = 1;
                     }
                     else{ 
-                        exp_length = strlcat(buf,new, bufsize);  
+                        exp_length = strlcat(buf,new2, bufsize);  
                         totallen = exp_length;
                     }
                 }
@@ -310,7 +319,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                             }
                         } 
                     }
-                    // result[npadding + strlen(arg)] = '\0'; 
+                    result[npadding + strlen(arg)] = '\0'; 
                     new = result;
                     if(bufsize <= (strlen(buf) + strlen(new))){
                         exp_length = strlcat(buf,new, bufsize);
@@ -424,7 +433,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 i++;
             }
             else if(format[i + 1] == 'x'){
-                int arg = va_arg(args, int);
+                unsigned int arg = va_arg(args, unsigned int);
 
                 const char* strarg = hex_string(arg);
                 char result[fw + 1];         
@@ -543,6 +552,38 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
 
                     result[npadding + strlen(strarg) + 2] = '\0';
                     new = result;
+
+
+                    if(bufsize <= (strlen(buf) + strlen(new))){
+                        exp_length = strlcat(buf,new, bufsize);
+                        if(overflow == 1){
+                            totallen += strlen(new);
+                        }
+                        else{
+                            totallen = exp_length;
+                        }
+                        overflow = 1;
+                    }
+                    else{
+
+                        exp_length = strlcat(buf,new, bufsize);
+                        totallen = exp_length;
+                    }
+                }
+                else{
+                    // exp_length = strlcat(buf,strarg, bufsize);
+                    //new = strarg;
+                    npadding = 0;
+                    for( int j = 2; j<npadding +strlen(strarg) + 2; j++){
+                        if(j < strlen(strarg) + 2){
+                            result[j] = strarg[j - 2];
+                        }
+                        else{
+                           result[j] = '0';
+                        }
+                    } 
+                    result[ strlen(strarg) + 2] = '\0';
+                    new = result;
                     if(bufsize <= (strlen(buf) + strlen(new))){
                         exp_length = strlcat(buf,new, bufsize);
                         if(overflow == 1){
@@ -555,24 +596,6 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                     }
                     else{
                         exp_length = strlcat(buf,new, bufsize);
-                        totallen = exp_length;
-                    }
-                }
-                else{
-                    // exp_length = strlcat(buf,strarg, bufsize);
-                    //new = strarg;
-                    if(bufsize <= (strlen(buf) + strlen(strarg))){
-                        exp_length = strlcat(buf,strarg, bufsize);
-                        if(overflow == 1){
-                            totallen += strlen(strarg);
-                        }
-                        else{
-                            totallen = exp_length;
-                        }
-                        overflow = 1;
-                    }
-                    else{
-                        exp_length = strlcat(buf,strarg, bufsize);
                         totallen = exp_length;
                     }
                 }
@@ -744,16 +767,18 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
 
         }
         else{
-            *new = format[i];
-            new++;
-            *new = '\0';
-            new--;
+            char new2[2];
+            new2[0] = format[i];
+            new2[1] = '\0';
+            // new2++;
+            // *new2 = '\0';
+            // new2--;
 
 
-            if(bufsize <= (strlen(buf) + strlen(new))){
-                exp_length = strlcat(buf,new, bufsize);
+            if(bufsize <= (strlen(buf) + strlen(new2))){
+                exp_length = strlcat(buf,new2, bufsize);
                 if(overflow == 1){
-                    totallen += strlen(new);
+                    totallen += strlen(new2);
                 }
                 else{
                     totallen = exp_length;
@@ -761,7 +786,7 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
                 overflow = 1;
             }
             else{
-                exp_length = strlcat(buf,new, bufsize);
+                exp_length = strlcat(buf,new2, bufsize);
                 totallen = exp_length;
             }
             
@@ -1080,5 +1105,6 @@ int printf(const char *format, ...) {
     va_start(ap, format);
     int result = vsnprintf(buf, bufsize, format, ap);
     va_end(ap);
+    uart_putstring(buf);
     return result;
 }
