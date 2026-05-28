@@ -62,6 +62,13 @@ void handle_clock(void* aux_data){
 
     static int ones = 0;
     static uint8_t code = 0; 
+    // static int resync=0; ///
+    static unsigned long time=0;
+    unsigned long lasttime = time;
+    time = timer_get_ticks(); 
+    //unsigned long time = timer_get_ticks();
+
+    // gpio_id_t clock = ((ps2_device_t*)aux_data)->clock;
     uint8_t rdata = gpio_read(((ps2_device_t*)aux_data)->data);
 // state machine to read bits of scancode, check for valid start bit, parity bit, and stop bit. If a full valid scancode is read, enqueue it into the ring buffer.
 // If an invalid bit is read, reset state and start over.
@@ -76,6 +83,19 @@ void handle_clock(void* aux_data){
             break;
 
         case PS2_START: //start state
+
+
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 ones++; // count number of ones for parity check
             }
@@ -84,6 +104,17 @@ void handle_clock(void* aux_data){
             code |= (rdata << 0);  // store first data bit in code variable, LSB first
             break;
         case PS2_BIT0: // read first bit
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 ones++; // count number of ones for parity check
             }
@@ -92,7 +123,17 @@ void handle_clock(void* aux_data){
             code |= (rdata << 1);  // store second data bit in code variable, LSB first
             break;
         case PS2_BIT1: // read second bit
-
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 ones++;  // count number of ones for parity check
             }
@@ -101,14 +142,34 @@ void handle_clock(void* aux_data){
 
             break;
         case PS2_BIT2: // read third bit
-            if(rdata == 1){
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }            if(rdata == 1){
                 ones++;  // count number of ones for parity check
             }
             ((ps2_device_t*)aux_data)->ps2_state = PS2_BIT3; // move to next state to read fourth data bit
             code |= (rdata << 3);   
             break;
         case PS2_BIT3: // read fourth bit
-            if(rdata == 1){
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }            if(rdata == 1){
                 ones++;  // count number of ones for parity check
             }
             ((ps2_device_t*)aux_data)->ps2_state = PS2_BIT4; // move to next state to read fifth data bit
@@ -116,7 +177,17 @@ void handle_clock(void* aux_data){
             // printf("Case 3 is Matched.");
             break;
         case PS2_BIT4: // read fifth bit
-            if(rdata == 1){ 
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }            if(rdata == 1){ 
                 ones++; 
             }
             ((ps2_device_t*)aux_data)->ps2_state = PS2_BIT5; // move to next state to read sixth data bit
@@ -124,6 +195,17 @@ void handle_clock(void* aux_data){
             // printf("Case 3 is Matched.");
             break;
         case PS2_BIT5:  // read sixth bit
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata== 1){
                 ones++; // count number of ones for parity check
             }
@@ -132,6 +214,17 @@ void handle_clock(void* aux_data){
             // printf("Case 3 is Matched.");
             break;
         case PS2_BIT6: // read seventh bit
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 ones++;  // count number of ones for parity check
             }
@@ -140,6 +233,17 @@ void handle_clock(void* aux_data){
             // printf("Case 3 is Matched.");
             break;
         case PS2_BIT7: //read parity bit
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 ones++; // count number of ones for parity check
             }
@@ -147,19 +251,43 @@ void handle_clock(void* aux_data){
                 ((ps2_device_t*)aux_data)->ps2_state = PS2_GPARITY; // move to next state to read stop bit
             }
             else{
-                ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; // invalid parity, reset state and start over
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+            
             }
             
             // printf("Case 3 is Matched.");
             break;
         case PS2_GPARITY: // read stop bit, which should be 1
+            if(time - lasttime > 500 * 24){
+                // printf("restart: %ld, time: %ld", restart, time);
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
+            }
             if(rdata == 1){
                 if(!rb_full(((ps2_device_t*)aux_data)->rb)){ // if ring buffer is not full, enqueue the scancode for later retrieval by ps2_read
                     rb_enqueue(((ps2_device_t*)aux_data)->rb, code);
                 }
             }
-            ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; // if stop bit is not 1, reset state and start over
-            break;
+                if(rdata == 0){ // start bit detected, move to next state to read data bits
+                    ((ps2_device_t*)aux_data)->ps2_state = PS2_START; 
+                    ones = 0;
+                    code = 0;
+                }
+                else
+                     ((ps2_device_t*)aux_data)->ps2_state = PS2_IDLE; 
+                break;
         default: 
             break;
         }
@@ -273,8 +401,8 @@ uint8_t ps2_readOLD(ps2_device_t *dev) {
 //It always returns a scancode, either one already in the queue or waits for a new one to be enqueued.
 uint8_t ps2_read(ps2_device_t *dev) {
 
-    static int ones = 0;
-    static uint8_t code = 0; 
+    // static int ones = 0;
+    // static uint8_t code = 0; 
     
 
     while(1){ // wait for a scancode to be available in the ring buffer, which is filled by the interrupt handler

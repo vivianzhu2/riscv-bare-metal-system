@@ -281,7 +281,7 @@ void main(void) {
     keyboard_init(KEYBOARD_CLOCK, KEYBOARD_DATA);
 
     // check_interrupts_received();
-    // check_read_delay();
+    check_read_delay();
 
 
     // test_keyboard_scancodes();
@@ -294,7 +294,7 @@ void main(void) {
     // test_shell_readline_keyboard();
     // 
 
-    test_keyboard_assert_unit();   // X
+    // test_keyboard_assert_unit();   // X
     // test_shell_readline_fixed_input_blue_led();
     // test_shell_evaluate_blue_led_on();
     // test_shell_evaluate_blue_led_off();  
