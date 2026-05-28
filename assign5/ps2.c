@@ -1,6 +1,8 @@
 /* File: ps2_assign5.c
  * -------------------
- * ***** TODO: add your file header comment here *****
+ * The ps2 module encapsulates functionality for interacting with a PS/2 device.
+ * The ps2.c module has only two functions: ps2_new and ps2_read.
+ * All of the nitty-gritty low-level protocol details are encapsulated within the ps2 module. 
  */
 #include "gpio.h"
 #include "gpio_extra.h"
@@ -43,35 +45,26 @@ ps2_device_t *ps2_new(gpio_id_t clock_gpio, gpio_id_t data_gpio) {
     return dev;
 }
 
-// Read a single PS2 scancode. Always returns a correctly received scancode:
-// if an error occurs (e.g., start bit not detected, parity is wrong), the
-// function should read another scancode.
-// uint8_t ps2_read(ps2_device_t *dev) {
-//     /***** TODO: Your code goes here *****/
 
-//     // Writing a separate helper function read_bit() is highly
-//     // recommended: this function waits for a clock falling
-//     // edge then reads the data pin. (Use code you wrote in lab!)
-//     return 0xFF;
-// }
-
-
+// Helper function to read one bit from the PS2 device, checking for valid timing
 uint8_t read_bit(ps2_device_t *dev){
     // check if the input is high enough
     gpio_id_t clock = dev->clock;
     gpio_id_t data = dev->data;
 
-    while(gpio_read(clock) == 0){
+    while(gpio_read(clock) == 0){ // wait for rising edge
     }
-    while(gpio_read(clock) == 1){
+    while(gpio_read(clock) == 1){ // wait for falling edge
     }
     return  gpio_read(data);
 }
-// Read a single PS2 scan code.
+// The ps2_read function reads one well-formed scancode.
+// "Well-formed" means that the start, parity, and stop bit each have valid values.
+// Read a single PS2 scancode. Always returns a correctly received scancode:
+// if an error occurs (e.g., start bit not detected, parity is wrong), the
+// function should read another scancode.
 uint8_t ps2_read(ps2_device_t *dev) {
-    /**** TODO: your code goes here *****/
-    // gpio_id_t clock = dev->clock;
-    // gpio_id_t data = dev->data;
+
     int ones = 0;
     // int valid = 0;
    
@@ -80,42 +73,71 @@ uint8_t ps2_read(ps2_device_t *dev) {
     // unsigned long restart = timer_get_ticks();
     unsigned long time = timer_get_ticks();
     unsigned long lasttime = timer_get_ticks();
+    int resync=0;
+    int start=0;
     while(1){
-        int start = read_bit(dev);
+        code = 0; 
+        ones = 0;
+        if (resync == 0){
+            start = read_bit(dev);
+        }
+        else{
+            resync = 0;
+        }
+        
+        //int start = read_bit(dev);
         if(start != 0){
             continue ;
         }
         lasttime = time;
         time =  timer_get_ticks();
+
+
+//         Your driver should implement a timeout reset that detects when the gap between bits is too long for them to have been part of the same scancode. Given the PS/2 bit rate of 10-16Khz, the expected gap between bits should be in the range 60-100us. Call your timer_get_ticks function to get a timestamp for each clock edge. If you detect that this clock edge occurred more than 500us after the previous timestamp, reset the scancode state and assume the current clock edge is for the start bit of a new scancode. This small effort provides additional robustness in your driver to combat flaky connections and hardware blips.
+//         After reconnect, your driver should immediately resynchronize (due to long gap) and correctly read the next new scancode.
+//         discard malformed (wrong start/stop/parity, timeout) and resynchronize
+// resycnhronize can be challenging to directly test, just try your best and we'll run under our test rig to give you results
         // if(restart - time > 500 * 24){
         //     // printf("restart: %ld, time: %ld", restart, time);
         //     continue;
         // }
         // timer_delay_us(30);
-
-        for(int i = 0; i < 8; i++){
+        //Call your timer_get_ticks function to get a timestamp for each clock edge. 
+        //If you detect that this clock edge occurred more than 500us after the previous timestamp, 
+        // reset the scancode state and assume the current clock edge is for the start bit of a new scancode. 
+        for(int i = 0; i < 8; i++){ // read 8 data bits, LSB first
             int bit = read_bit(dev);
             lasttime = time;
             time = timer_get_ticks(); 
             if(time - lasttime > 500 * 24){
                 // printf("restart: %ld, time: %ld", restart, time);
-                continue;
+                    resync = 1;
+                    start=bit;
+                    break;  
+
             }
             code |= (bit << i); 
             if(bit == 1){
                 ones += 1;
             }
         }
+        if (resync == 1){
+            continue;
+        }
         int parity = read_bit(dev);
         lasttime = time;
         time = timer_get_ticks(); 
         if(time - lasttime > 500 * 24){
             // printf("restart: %ld, time: %ld", restart, time);
+            resync = 1;
+            start=parity;
             continue;
         }
         // printf("ones: %d", ones);
         if((ones + parity) % 2 == 0){
             ones = 0;
+            resync = 1;
+            start=parity;
             continue;  // bad parity, try again
         }
         else{
@@ -128,9 +150,13 @@ uint8_t ps2_read(ps2_device_t *dev) {
         time = timer_get_ticks(); 
         if(time - lasttime > 500 * 24){
             // printf("restart: %ld, time: %ld", restart, time);
+            resync = 1;
+            start=stop;
             continue;
         }
         if(stop != 1){
+            resync = 1;
+            start=stop;
             continue;
         }   
         // if(ones%2 == 1){
