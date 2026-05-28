@@ -32,9 +32,9 @@ int backtrace_gather_frames(frame_t f[], int max_frames) { // gather up to max_f
         ra = (uintptr_t)*((uintptr_t*)fp_reg -1);
         f[count].resume_addr = ra;
         count += 1;
-        printf("ra:%lx fp:%p\n", ra,fp_reg);
+        //printf("ra:%lx fp:%p\n", ra,fp_reg);
         fp_reg = (void *)(uintptr_t)(*((uintptr_t*)fp_reg - 2));
-        printf("AFTER: ra:%lx fp:%p\n", ra,fp_reg);
+        //printf("AFTER: ra:%lx fp:%p\n", ra,fp_reg);
     }
 
     return count;
