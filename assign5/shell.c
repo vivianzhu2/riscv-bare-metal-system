@@ -129,7 +129,7 @@ int cmd_peek(int argc, const char* argv[]) {
         // }
         unsigned long address = strtonum(addr,NULL);
         if (address==0){
-            module.shell_printf("error: poke cannot convert '%s'\n", addr);
+            module.shell_printf("error: peek cannot convert '%s'\n", addr);
             return 1;
         }
         /// If the address argument is missing or cannot be converted, 
@@ -383,6 +383,8 @@ int shell_evaluate(const char *line) {
     }
     
     else{
+    // if the command is not found, print an error message
+        module.shell_printf("error: no such command '%s' \n", tokens[0]); 
         return -1;
     }
 
