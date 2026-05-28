@@ -272,6 +272,7 @@ void shell_readline(char buf[], size_t bufsize) {
         else if (c == '\b') {
             if (length < 1) {
                 shell_bell();
+                break;
             } else {
                 length -= 1;
                 module.shell_printf("%c", '\b');
@@ -300,6 +301,7 @@ void shell_readline(char buf[], size_t bufsize) {
         }
         else if (length > bufsize - 1) {
             shell_bell();
+            break;
         }
         else {
             if (c <= 0x7f) {

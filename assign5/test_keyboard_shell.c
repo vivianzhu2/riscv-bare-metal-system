@@ -206,7 +206,7 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    // test_keyboard_scancodes();
+    test_keyboard_scancodes();
     // test_keyboard_sequences();
     // test_keyboard_events();
     // test_keyboard_chars();
@@ -216,7 +216,7 @@ void main(void) {
     // test_shell_readline_keyboard();
 // 
 
-    test_keyboard_assert_unit();   // X
+    // test_keyboard_assert_unit();   // X
     // test_shell_readline_fixed_input_blue_led();
     // test_shell_evaluate_blue_led_on();
     // test_shell_evaluate_blue_led_off();  
