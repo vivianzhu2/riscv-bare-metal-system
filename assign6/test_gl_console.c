@@ -11,6 +11,7 @@
 #include "strings.h"
 #include "timer.h"
 #include "uart.h"
+#include "de.h"
 
 static void pause(const char *message) {
     if (message) printf("\n%s\n", message);
@@ -60,6 +61,45 @@ static void test_fb(void) {
         assert(cptr != NULL);
         timer_delay_ms(250);
     }
+
+    fb_init(800, 600, FB_SINGLEBUFFER);
+    de_init(800, 600, 800, 600);
+    int ret_val = 0;
+    ret_val = fb_get_width();
+    assert(ret_val == 800);
+    ret_val = fb_get_height(); 
+    assert(ret_val == 600);
+    ret_val = fb_get_depth();
+    assert(ret_val == 4);
+
+    void* ptr1 = fb_get_draw_buffer();
+    memset(ptr1, 0x77, nbytes);
+    // check on-screen contents   ok
+    fb_swap_buffer();
+    // check on-screen contents   ok
+    void* ptr2 = fb_get_draw_buffer();
+  
+    fb_init(125, 80, FB_DOUBLEBUFFER);
+    de_init(125, 80, 800, 600);
+    ret_val = fb_get_width();
+    ret_val = fb_get_height();
+    void* ptr3 = fb_get_draw_buffer();
+    memset(ptr3, 0xfe, nbytes);
+    fb_swap_buffer();
+    // check on-screen contents   ok
+    void* ptr4 = fb_get_draw_buffer();
+    ptr4 = fb_get_draw_buffer(); //ag_assertion failed: ptr4 should not be same as ptr3
+    memset(ptr4, 0x01, nbytes);
+    assert(ptr4 != ptr3);
+    fb_swap_buffer();
+    // check on-screen contents   ok
+    fb_swap_buffer();
+//   - check on-screen contents   ok
+    assert(ptr4 != ptr3);
+//   + check on-screen contents   ag_assertion failed: contents should be uniform white
+    fb_swap_buffer();
+    // check on-screen contents   ok
+//   should be the same buffer after swap
 }
 
 static void test_gl(void) {
@@ -352,8 +392,8 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    // test_fb();
-    test_gl();
+    test_fb();
+    // test_gl();
     // test_console();
 
     /***** TODO: Add more and better tests!  *****/

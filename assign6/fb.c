@@ -84,7 +84,8 @@ void fb_init(int width, int height, fb_mode_t mode) {
         
         if(module.buffers[1] != NULL){ // check if buffers already allocated
             free(module.buffers[1]); // deallocate previous memory
-            
+            // wpuld you only nned to free the draw buffer? 
+        
         }
         module.buffers[0] = malloc(nbytes);
         memset(module.buffers[0], 0x0, nbytes);
@@ -189,7 +190,7 @@ void* fb_get_draw_buffer(void){
     if(module.mode ==FB_DOUBLEBUFFER ){ // return off-screen buffer in double buffer mode
         // printf("module buff 1  %p \n", module.buffers[1]);
         // printf("module buff 0 %p \n", module.buffers[0]);
-        return module.buffers[module.current];
+        return module.buffers[1];
         
 
     }
