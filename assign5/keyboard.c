@@ -98,7 +98,7 @@ key_event_t keyboard_read_event(void) {
 
     static int isCapsLock = 0;
 
-
+    static int cap_released = 1;
 while((id != 0 && id<=0x93 && id>=0x90)) { // if the key is a modifier, update the modifiers state and read another sequence until we get a non-modifier key
 
     if(id == PS2_KEY_SHIFT && sequence.what == KEY_PRESS){ // shift is pressed down
@@ -134,19 +134,20 @@ while((id != 0 && id<=0x93 && id>=0x90)) { // if the key is a modifier, update t
         }
 
     }
-    if(id == PS2_KEY_CAPS_LOCK && sequence.what == KEY_PRESS && isCapsLock == 0){ // caps lock is pressed down
+    if(id == PS2_KEY_CAPS_LOCK && sequence.what == KEY_PRESS && isCapsLock == 0 && cap_released == 1){ // caps lock is pressed down
         mods |= KEYBOARD_MOD_CAPS_LOCK; 
         // printf("next %x \n",nextId);
         isCapsLock = 1;
+        cap_released = 0;
     }
-    else if(id == PS2_KEY_CAPS_LOCK && isCapsLock == 1 && sequence.what == KEY_PRESS){ // caps lock is pressed down again, turn it off
+    else if(id == PS2_KEY_CAPS_LOCK && isCapsLock == 1 && sequence.what == KEY_PRESS && cap_released == 1){ // caps lock is pressed down again, turn it off
         isCapsLock = 0;
         mods &= ~KEYBOARD_MOD_CAPS_LOCK;
     }
     else{
         if(sequence.what == KEY_RELEASE && id == PS2_KEY_CAPS_LOCK){ // caps lock is released, do nothing
 
-            
+            cap_released=1;
             
         }
 

@@ -384,6 +384,12 @@ int shell_evaluate(const char *line) {
     else if(strcmp(tokens[0],"history") == 0){ // if the command is poke, execute the poke command function
         return cmd_history(ntokens, tokens);
     }
+    else if(strcmp(tokens[0],"") == 0){ // if the command is empty, execute nothing
+        
+        //module.shell_printf("\n");
+        return 0;
+
+    }
     
     else{
     // if the command is not found, print an error message
