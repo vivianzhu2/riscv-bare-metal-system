@@ -127,8 +127,9 @@ int cmd_peek(int argc, const char* argv[]) {
         //     }
     
         // }
-        unsigned long address = strtonum(addr,NULL);
-        if (address==0){
+        const char **endptr = (const char *[]){"Alpha", "Beta", "Gamma"};
+        unsigned long address = strtonum(addr,endptr);
+        if (address==0 || *endptr[0] != '\0'){
             module.shell_printf("error: peek cannot convert '%s'\n", addr);
             return 1;
         }
@@ -156,7 +157,8 @@ int cmd_history(int argc, const char* argv[]) {
     if (argc == 1) {
         log = nhistory;
     } else if (argc == 2) {
-        log = strtonum(argv[1], NULL);
+        const char **endptr = (const char *[]){"Alpha", "Beta", "Gamma"};
+        log = strtonum(argv[1], endptr);
         if (log > nhistory) log = nhistory;
     } else {
         module.shell_printf("error: history expects 1 argument [num]\n");
@@ -187,15 +189,16 @@ int cmd_poke(int argc, const char* argv[]) {
         //     }
     
         // }
-        unsigned long address = strtonum(addr,NULL);
-        if (address==0){
+        const char **endptr = (const char *[]){"Alpha", "Beta", "Gamma"};
+        unsigned long address = strtonum(addr,endptr);
+        if (address ==0  || *endptr[0] != '\0'){
             module.shell_printf("error: poke cannot convert '%s'\n", addr);
             return 1;
         }
         unsigned long value = 0;
         if(strcmp(val, "0") != 0){
-            value = strtonum(val,NULL);
-            if (value==0){
+            value = strtonum(val,endptr);
+            if (value==0 || *endptr[0] != '\0'){
                 module.shell_printf("error: poke cannot convert '%s'\n", val);
                 return 1;
             }
