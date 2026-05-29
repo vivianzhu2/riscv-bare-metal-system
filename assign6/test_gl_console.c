@@ -133,8 +133,8 @@ static void test_gl(void) {
     
     gl_swap_buffer();
 
-    gl_draw_char(170, 50, 'V', GL_WHITE);
-    gl_swap_buffer();
+    // gl_draw_char(170, 50, 'V', GL_WHITE);
+    // gl_swap_buffer();
     pause("Now displaying 1280 x 720, purple bg, single green pixel, blue center rect, amber letter A");
     /* Test: form feed in gl_draw_string should clear the screen and move cursor to top-left.
      * Draw some text at an offset, then issue a string containing a form feed followed by
@@ -313,16 +313,18 @@ static void test_gl(void) {
     // use gl_draw_rect to draw a rectangle that is larger than the screen and confirm that it is correctly clipped to the screen dimensions and that no out-of-bounds memory is accessed.
     // 
     gl_init(25, 8, GL_SINGLEBUFFER);
-    de_init(25, 8, 800, 600);
+    // de_init(25, 8, 800, 600);
     gl_clear(GL_BLACK);
 // does not draw rect here
     gl_draw_rect(0,0, 3,3, GL_YELLOW);
+    gl_swap_buffer();
     assert(gl_read_pixel(0, 0) == GL_YELLOW);
     assert(gl_read_pixel(2, 2) == GL_YELLOW);
     assert(gl_read_pixel(3, 0) == GL_BLACK);
     pause("Yellow rectangle");
 
     gl_draw_rect(8,3, 5,2, GL_BLUE);
+    gl_swap_buffer();
     assert(gl_read_pixel(8, 3) == GL_BLUE);
     assert(gl_read_pixel(12, 4) == GL_BLUE);
     assert(gl_read_pixel(13, 3) == GL_BLACK);
@@ -330,6 +332,7 @@ static void test_gl(void) {
     pause("Blue rectangle");
     gl_draw_rect(0,0, 1,8, GL_GREEN);
     gl_draw_rect(0,0, 25,1, GL_GREEN);
+    gl_swap_buffer();
     assert(gl_read_pixel(0, 0) == GL_GREEN);
     assert(gl_read_pixel(0, 7) == GL_GREEN);
     assert(gl_read_pixel(24, 0) == GL_GREEN);
@@ -340,7 +343,7 @@ static void test_gl(void) {
     //    gl_init(25, 8, GL_SINGLEBUFFER)
 
     gl_init(8, 4, GL_SINGLEBUFFER);
-    de_init(8, 4, 800, 600);
+    // de_init(8, 4, 800, 600);
     gl_clear(GL_RED);
     int ret_val = 0;
     ret_val = gl_read_pixel(0,-1);
@@ -440,7 +443,10 @@ static void test_console(void) {
     /* Newline handling test: multiple consecutive newlines */
     console_printf("Newline test start\n\n\nEnd of newline test\n");
     pause("Newline test: there should be blank lines between start and end");
-
+    
+    console_init(3, 3, GL_WHITE, GL_BLACK);
+    console_printf("abcde");
+    pause("Newline test: there should be blank lines between start and end");
 
     console_init(3, 5, GL_WHITE, GL_BLACK);
     de_init(70,48,800,600);
@@ -452,6 +458,11 @@ static void test_console(void) {
 
     
     printf("WIDTH: %d HEIGHT: %d", gl_get_width(), gl_get_height());
+    assert(ret_val == 63);
+    console_printf("one\n");
+    ret_val = gl_get_width();
+    assert(ret_val == 70);
+    ret_val = gl_get_height();
     assert(ret_val == 63);
 
  }

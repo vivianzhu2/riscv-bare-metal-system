@@ -145,9 +145,11 @@ int console_printf(const char *format, ...) {
                 }
                 // keeps the buffer but overwrites the same line height
                 // memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
+                
+                
+                // cursor_y -= module.line_height;
+                cursor_y -= module.line_height;
                 gl_draw_rect(0,cursor_y, gl_get_width(),module.line_height, module.bg_color);
-                cursor_y -= module.line_height;
-                cursor_y -= module.line_height;
 
             }
             
@@ -180,9 +182,10 @@ int console_printf(const char *format, ...) {
                     memcpy(im[ypos - module.line_height], im[ypos], gl_get_width() * 4);
                     // printf("SCROLLING");
                 }
-                // memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
-                gl_draw_rect(0,cursor_y, gl_get_width(),module.line_height, module.bg_color);
+                // memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4); //
+               
                 cursor_y -= module.line_height;
+                gl_draw_rect(0,cursor_y, gl_get_width(),module.line_height, module.bg_color); // clean up the new line after scrolling
                 // for(int yp = module.line_height; yp < cursor_y; yp ++){
                 //     for(int xp = 0; xp < gl_get_width() ; xp++){
                 //         gl_draw_pixel(xp,yp - module.line_height, gl_read_pixel(xp, yp));
