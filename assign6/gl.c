@@ -97,6 +97,7 @@ color_t gl_color(uint8_t r, uint8_t g, uint8_t b) {
  * If not in double-buffer mode, all drawing takes place on-screen and
  * the `gl_swap_buffer` function has no effect.
  */
+
 void gl_swap_buffer(void) {
     /***** TODO: Your code goes here *****/
     fb_swap_buffer();

@@ -21,6 +21,7 @@ static struct{
     
     void *buffers0;
     void *buffers1; ;
+    int fbsize;
     int current;
 
     fb_mode_t mode;
@@ -76,6 +77,7 @@ void fb_init(int width, int height, fb_mode_t mode) {
     // struct display second;
     module.mode = mode;
     module.current = 0;
+    module.fbsize = module.width * module.height * module.depth;
     if(mode == FB_DOUBLEBUFFER){ // allocate two buffers
  
         if(module.buffers0 != NULL) // check if buffers already allocated
@@ -232,17 +234,24 @@ void fb_swap_buffer(void) {
     // buffer offscreen is now on screen
     
     
-    if(module.mode == FB_SINGLEBUFFER){ // set active framebuffer to single buffer
-        de_set_active_framebuffer(module.framebuffer);
-    }
-    else{ // set active framebuffer to first buffer in double buffer mode
-         void* temp = module.buffers0;
+    // if(module.mode == FB_SINGLEBUFFER){ // set active framebuffer to single buffer
+    //     de_set_active_framebuffer(module.framebuffer);
+    // }
+    // else{ // set active framebuffer to first buffer in double buffer mode
+    //      void* temp = module.buffers0;
+    //     module.buffers0 = module.buffers1; 
+    //     module.buffers1 = temp;
+
+    //     de_set_active_framebuffer(module.buffers0);
+    // }
+    if(module.mode == FB_DOUBLEBUFFER){ // set active framebuffer to first buffer in double buffer mode
+        void* temp = module.buffers0;
         module.buffers0 = module.buffers1; 
         module.buffers1 = temp;
-
         de_set_active_framebuffer(module.buffers0);
-    }
+        memcpy(module.buffers1,module.buffers0,module.fbsize);
 
-}
+        }
+    }
 
  

@@ -54,7 +54,7 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
     gl_init(width, height, GL_DOUBLEBUFFER); 
 
     gl_clear(background);
-    // gl_swap_buffer();
+    gl_swap_buffer();
     cursor_x = 0;
     cursor_y = 0;
 
