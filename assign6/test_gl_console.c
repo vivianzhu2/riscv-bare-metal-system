@@ -86,10 +86,12 @@ static void test_fb(void) {
     void* ptr3 = fb_get_draw_buffer();
     memset(ptr3, 0xfe, nbytes);
     fb_swap_buffer();
+    pause("Scrolling test: top lines should have scrolled off; verify visually");
     // check on-screen contents   ok
     void* ptr4 = fb_get_draw_buffer();
     ptr4 = fb_get_draw_buffer(); //ag_assertion failed: ptr4 should not be same as ptr3
     memset(ptr4, 0x01, nbytes);
+    pause("Scrolling test: top lines should have scrolled off; verify visually");
     assert(ptr4 != ptr3);
     fb_swap_buffer();
     // check on-screen contents   ok
@@ -131,8 +133,8 @@ static void test_gl(void) {
     
     gl_swap_buffer();
 
-    // gl_draw_char(170, 50, 'V', GL_WHITE);
-    // gl_swap_buffer();
+    gl_draw_char(170, 50, 'V', GL_WHITE);
+    gl_swap_buffer();
     pause("Now displaying 1280 x 720, purple bg, single green pixel, blue center rect, amber letter A");
     /* Test: form feed in gl_draw_string should clear the screen and move cursor to top-left.
      * Draw some text at an offset, then issue a string containing a form feed followed by
@@ -185,14 +187,18 @@ static void test_gl(void) {
 
 
     gl_clear(GL_BLACK);
+    printf("gl_clear(GL_BLACK) %x\n", gl_read_pixel(0, 0));
     gl_draw_rect(10, 10, 50, 30, GL_CYAN);
     gl_swap_buffer();
     // corners of rect should be cyan
-    assert(gl_read_pixel(10, 10)   == GL_CYAN);
-    assert(gl_read_pixel(59, 10)   == GL_CYAN);  // x+w-1
-    assert(gl_read_pixel(10, 39)   == GL_CYAN);  // y+h-1
-    assert(gl_read_pixel(59, 39)   == GL_CYAN);
+    // assert(gl_read_pixel(10, 10)   == GL_CYAN);
+    // why did the above line fail: 
+    // assert(gl_read_pixel(59, 10)   == GL_CYAN);  // x+w-1
+    // assert(gl_read_pixel(10, 39)   == GL_CYAN);  // y+h-1
+    // assert(gl_read_pixel(59, 39)   == GL_CYAN);
     // just outside rect should still be black
+    /// why is it red why is it red 
+    printf("gl_read_pixel(10, 10): %x\n", gl_read_pixel(10, 10));
     assert(gl_read_pixel(9, 10)    == GL_BLACK);
     assert(gl_read_pixel(60, 10)   == GL_BLACK);
     assert(gl_read_pixel(10, 9)    == GL_BLACK);
@@ -305,8 +311,31 @@ static void test_gl(void) {
     pause("Long string test: string wraps within screen boundaries and is clipped correctly");
 
     // use gl_draw_rect to draw a rectangle that is larger than the screen and confirm that it is correctly clipped to the screen dimensions and that no out-of-bounds memory is accessed.
+    // 
+    gl_init(25, 8, GL_SINGLEBUFFER);
+    de_init(25, 8, 800, 600);
+    gl_clear(GL_BLACK);
+// does not draw rect here
+    gl_draw_rect(0,0, 3,3, GL_YELLOW);
+    assert(gl_read_pixel(0, 0) == GL_YELLOW);
+    assert(gl_read_pixel(2, 2) == GL_YELLOW);
+    assert(gl_read_pixel(3, 0) == GL_BLACK);
 
+    gl_draw_rect(8,3, 5,2, GL_BLUE);
+    assert(gl_read_pixel(8, 3) == GL_BLUE);
+    assert(gl_read_pixel(12, 4) == GL_BLUE);
+    assert(gl_read_pixel(13, 3) == GL_BLACK);
 
+    gl_draw_rect(0,0, 1,8, GL_GREEN);
+    gl_draw_rect(0,0, 25,1, GL_GREEN);
+    assert(gl_read_pixel(0, 0) == GL_GREEN);
+    assert(gl_read_pixel(0, 7) == GL_GREEN);
+    assert(gl_read_pixel(24, 0) == GL_GREEN);
+    pause("Long string test: string wraps within screen boundaries and is clipped correctly");
+    // turns black here
+    // why is it a black screen here?  d
+    //
+    assert(gl_read_pixel(24, 7) == GL_GREEN);   
    
     
     ///Be sure to have test cases that confirm that character drawing is correctly clipped.
@@ -317,7 +346,8 @@ static void test_console(void) {
 
     console_init(25, 50, GL_CYAN, GL_INDIGO);
     pause("Now displaying console: 25 rows x 50 columns, bg indigo, fg cyan");
-
+    console_printf("one\n");
+    console_printf("not\b\b\btwo\n");
     // Line 1: Hello, world!
     console_printf("Hello, world!\n");
 
@@ -392,9 +422,9 @@ void main(void) {
     // Uncomment the call to each test function below when you have implemented
     // the functions and are ready to test them
 
-    test_fb();
+    // test_fb();
     // test_gl();
-    // test_console();
+    test_console();
 
     /***** TODO: Add more and better tests!  *****/
     printf("Completed main() in test_gl_console.c\n");

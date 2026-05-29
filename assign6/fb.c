@@ -19,7 +19,8 @@ static struct{
     int depth;             // num bytes per pixel
     void *framebuffer;     // address of framebuffer memor
     
-    void *buffers[2];
+    void *buffers0;
+    void *buffers1; ;
     int current;
 
     fb_mode_t mode;
@@ -77,23 +78,23 @@ void fb_init(int width, int height, fb_mode_t mode) {
     module.current = 0;
     if(mode == FB_DOUBLEBUFFER){ // allocate two buffers
  
-        if(module.buffers[0] != NULL) // check if buffers already allocated
+        if(module.buffers0 != NULL) // check if buffers already allocated
         {
-            free(module.buffers[0]); // deallocate previous memory
+            free(module.buffers0); // deallocate previous memory
         }
         
-        if(module.buffers[1] != NULL){ // check if buffers already allocated
-            free(module.buffers[1]); // deallocate previous memory
+        if(module.buffers1 != NULL){ // check if buffers already allocated
+            free(module.buffers1); // deallocate previous memory
             // wpuld you only nned to free the draw buffer? 
         
         }
         if(module.framebuffer != NULL){ // check if framebuffer already allocated
             free(module.framebuffer); // deallocate previous memory
         }
-        module.buffers[0] = malloc(nbytes);
-        memset(module.buffers[0], 0x0, nbytes);
-        module.buffers[1] = malloc(nbytes);
-        memset(module.buffers[1], 0x0, nbytes);
+        module.buffers0 = malloc(nbytes);
+        memset(module.buffers0, 0x0, nbytes);
+        module.buffers1 = malloc(nbytes);
+        memset(module.buffers1, 0x0, nbytes);
 
         // printf("init  %p buffer[0]: %x", module.buffers[0], *(char*)module.buffers[0]);
         // printf("init  %p buffer[1]: %x", module.buffers[1], *(char*)module.buffers[1]);
@@ -103,14 +104,14 @@ void fb_init(int width, int height, fb_mode_t mode) {
             free(module.framebuffer); // deallocate previous memory
         }
 
-        if(module.buffers[0] != NULL) // check if buffers already allocated
+        if(module.buffers0 != NULL) // check if buffers already allocated
         {
-            free(module.buffers[0]); // deallocate previous memory
+            free(module.buffers0); // deallocate previous memory
         }
         
-        if(module.buffers[1] != NULL){ // check if buffers already allocated
-            free(module.buffers[1]); // deallocate previous memory
-            // wpuld you only nned to free the draw buffer? 
+        if(module.buffers1 != NULL){ // check if buffers already allocated
+            free(module.buffers1); // deallocate previous memory
+            // wpuld you only nned[] to free the draw buffer? 
         
         }
         module.framebuffer = malloc(nbytes);
@@ -127,7 +128,7 @@ void fb_init(int width, int height, fb_mode_t mode) {
         de_set_active_framebuffer(module.framebuffer);
     }
     else{ // set active framebuffer to first buffer in double buffer mode
-        de_set_active_framebuffer(module.buffers[0]);
+        de_set_active_framebuffer(module.buffers0);
     }
 
     
@@ -204,7 +205,7 @@ void* fb_get_draw_buffer(void){
     if(module.mode ==FB_DOUBLEBUFFER ){ // return off-screen buffer in double buffer mode
         // printf("module buff 1  %p \n", module.buffers[1]);
         // printf("module buff 0 %p \n", module.buffers[0]);
-        return module.buffers[1];
+        return module.buffers1;
         
 
     }
@@ -230,15 +231,18 @@ void fb_swap_buffer(void) {
     // fast exchange of front and back (off-screen) buffers
     // buffer offscreen is now on screen
     
-    void* temp = module.buffers[0];
-    module.buffers[0] = module.buffers[1]; 
-    module.buffers[1] = temp;
-    if(module.current == 0){ // swap buffers and set current to 1
-        module.current = 1;
+    
+    if(module.mode == FB_SINGLEBUFFER){ // set active framebuffer to single buffer
+        de_set_active_framebuffer(module.framebuffer);
     }
-    else{ // swap buffers and set current to 0
-        module.current = 0;
+    else{ // set active framebuffer to first buffer in double buffer mode
+         void* temp = module.buffers0;
+        module.buffers0 = module.buffers1; 
+        module.buffers1 = temp;
+
+        de_set_active_framebuffer(module.buffers0);
     }
-    // printf("current: %d", module.current);
 
 }
+
+ 

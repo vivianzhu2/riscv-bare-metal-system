@@ -176,7 +176,7 @@ color_t gl_read_pixel(int x, int y) {
  * @param c     color of rectangle
  */
 void gl_draw_rect(int x, int y, int w, int h, color_t c) {
-
+// any bugs?  r
         for(int k = x; k < x + w; k ++){
             for(int m = y; m < y + h; m++){
                 if(k < 0 || k >= gl_get_width() || m < 0 || m >= gl_get_height()){ // if location is outside bounds of framebuffer, do not draw the pixel

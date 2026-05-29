@@ -3,7 +3,7 @@ RUN_PROGRAM   		= console_shell.bin
 TEST_PROGRAM  		= test_gl_console.bin
 EXTENSION_PROGRAM   = extension.bin
 
-MY_MODULE_SOURCES 	= fb.c gl.c console.c
+MY_MODULE_SOURCES 	=  fb.c gl.c console.c
 
 # MY_MODULE_SOURCES is a list of those library modules (such as gpio.c)
 # for which you intend to use your own code. The reference implementation
