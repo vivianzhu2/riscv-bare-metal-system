@@ -204,10 +204,10 @@ void main(void) {
     // the functions and are ready to test them
 
     // test_backtrace();
-    test_stack_protector();
-    // test_heap_dump();
-    // test_heap_simple();
-    // test_heap_oddballs();
+    // test_stack_protector();
+    test_heap_dump();
+    test_heap_simple();
+    test_heap_oddballs();
     // test_heap_multiple();
 
     /***** TODO: Add more and better tests!  *****/

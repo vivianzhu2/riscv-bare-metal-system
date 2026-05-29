@@ -99,7 +99,7 @@ void *malloc(size_t nbytes) { // return pointer to newly allocated block of at l
     for(int i = 0; i< count_allocs + count_frees; i++){
         if(tempheader->status == 0){ // if space is free, check if it has a large enough gap
             if(tempheader->payload_size >= nbytes){ // if it has a large enough gap, split remainder into its own free block
-                if((void*)((char *)tempheader + nbytes) > HEAP_MAX){ // if request would extend beyond heap max, reject
+                if((void*)((char *)tempheader + nbytes+8) > HEAP_MAX){ // if request would extend beyond heap max, reject
                     return NULL;
                 }
                 insert = 1;
@@ -139,7 +139,7 @@ void *malloc(size_t nbytes) { // return pointer to newly allocated block of at l
     }
     if(insert == 0){ // check whether hit the heap end
         tempheader = cur_heap_end;
-        if((void*)((char *)tempheader + nbytes) > HEAP_MAX){ // if request would extend beyond heap max, reject
+        if((void*)((char *)tempheader + nbytes+8) > HEAP_MAX){ // if request would extend beyond heap max, reject
             return NULL;
         }
         // if(tempheader + nbytes + 8 < HEAP_MAX){
@@ -174,8 +174,11 @@ void free(void *ptr) {
     volatile struct header *ogblock = ptr;
     struct header *headerptr = ptr;
 
-    count_frees++;
-    count_allocs--;
+    
+    if (headerptr->status == 1) {
+        count_allocs--;
+        count_frees++;
+    }
     total_bytes_requested -= headerptr->payload_size;
     headerptr->status = 0;
     ogblock->status = 0;
