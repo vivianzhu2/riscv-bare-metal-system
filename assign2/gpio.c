@@ -99,6 +99,9 @@ void gpio_set_function(gpio_id_t pin, unsigned int function) {
    if (gpio_id_is_valid(pin)== false){
       return;
    } 
+   if (function>= 16){ // check if function is valid, since only 4 bits are used to specify function, the max value is 15
+      return;
+   }    
    gpio_pin_t target_pin;
    target_pin = get_group_and_index(pin); 
    unsigned int group = target_pin.group;
@@ -137,6 +140,10 @@ unsigned int gpio_get_function(gpio_id_t pin) {
    unsigned int results = shiftedpattern & target_val;
    return (results>>bit_pos);
 }
+
+   // unsigned int target_val = *reg;
+   // unsigned int shiftedpattern = (0xf << bit_pos);
+   // unsigned int results = shiftedpattern & target_val;
 // Function that configures a pin to a selected function. 
 // ---------------------------------------------------------
 // Checks if the input pin is valid to continue
