@@ -320,22 +320,50 @@ static void test_gl(void) {
     assert(gl_read_pixel(0, 0) == GL_YELLOW);
     assert(gl_read_pixel(2, 2) == GL_YELLOW);
     assert(gl_read_pixel(3, 0) == GL_BLACK);
+    pause("Yellow rectangle");
 
     gl_draw_rect(8,3, 5,2, GL_BLUE);
     assert(gl_read_pixel(8, 3) == GL_BLUE);
     assert(gl_read_pixel(12, 4) == GL_BLUE);
     assert(gl_read_pixel(13, 3) == GL_BLACK);
 
+    pause("Blue rectangle");
     gl_draw_rect(0,0, 1,8, GL_GREEN);
     gl_draw_rect(0,0, 25,1, GL_GREEN);
     assert(gl_read_pixel(0, 0) == GL_GREEN);
     assert(gl_read_pixel(0, 7) == GL_GREEN);
     assert(gl_read_pixel(24, 0) == GL_GREEN);
-    pause("Long string test: string wraps within screen boundaries and is clipped correctly");
+    pause("Green border rectangles");
+    // pause("Long string test: string wraps within screen boundaries and is clipped correctly");
     // turns black here
     // why is it a black screen here?  d
-    //
-    assert(gl_read_pixel(24, 7) == GL_GREEN);   
+    //    gl_init(25, 8, GL_SINGLEBUFFER)
+
+    gl_init(8, 4, GL_SINGLEBUFFER);
+    de_init(8, 4, 800, 600);
+    gl_clear(GL_RED);
+    int ret_val = 0;
+    ret_val = gl_read_pixel(0,-1);
+    assert(ret_val == 0);
+    ret_val = gl_read_pixel(-1,0);
+    assert(ret_val == 0);
+    ret_val = gl_read_pixel(8,0); 
+    assert(ret_val == 0);
+    ret_val = gl_read_pixel(0,4);
+    assert(ret_val == 0); 
+    ret_val = gl_read_pixel(16,8); 
+    assert(ret_val == 0);
+    ret_val = gl_read_pixel(-4,-2); 
+    assert(ret_val == 0);
+
+    gl_init(16, 16, GL_SINGLEBUFFER);
+    de_init(16, 16, 800, 600);
+    gl_clear(GL_BLACK);
+
+    gl_draw_char(0,0, 0x7, GL_YELLOW);
+    pause("Characters!");
+
+    
    
     
     ///Be sure to have test cases that confirm that character drawing is correctly clipped.
@@ -347,6 +375,7 @@ static void test_console(void) {
     console_init(25, 50, GL_CYAN, GL_INDIGO);
     pause("Now displaying console: 25 rows x 50 columns, bg indigo, fg cyan");
     console_printf("one\n");
+    printf("fb width: %d, height: %d\n", gl_get_width(), gl_get_height());
     console_printf("not\b\b\btwo\n");
     // Line 1: Hello, world!
     console_printf("Hello, world!\n");
@@ -411,6 +440,19 @@ static void test_console(void) {
     /* Newline handling test: multiple consecutive newlines */
     console_printf("Newline test start\n\n\nEnd of newline test\n");
     pause("Newline test: there should be blank lines between start and end");
+
+
+    console_init(3, 5, GL_WHITE, GL_BLACK);
+    de_init(70,48,800,600);
+    int ret_val = 0;
+    ret_val = gl_get_width();
+    assert(ret_val == 70);
+    ret_val = gl_get_height();
+    // WIDTH: 70 HEIGHT: 48 
+
+    
+    printf("WIDTH: %d HEIGHT: %d", gl_get_width(), gl_get_height());
+    assert(ret_val == 63);
 
  }
 

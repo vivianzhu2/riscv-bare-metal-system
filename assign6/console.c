@@ -47,10 +47,10 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
 
     // initialize text contents to empty
     int width = ncols * gl_get_char_width();
-    int height = nrows *module.line_height;// gl_get_char_height();
+    int height = nrows * module.line_height;// gl_get_char_height();
 //  int height = nrows *module.line_height;
     //printf("WIDTH: %d HEIGHT: %d", width, height);
-
+    printf("%d",module.line_height);
     gl_init(width, height, GL_DOUBLEBUFFER); 
 
     gl_clear(background);
@@ -143,7 +143,10 @@ int console_printf(const char *format, ...) {
                     memcpy(im[ypos - module.line_height], im[ypos], gl_get_width() * 4);
                     
                 }
-                memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
+                // keeps the buffer but overwrites the same line height
+                // memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
+                gl_draw_rect(0,cursor_y, gl_get_width(),module.line_height, module.bg_color);
+                cursor_y -= module.line_height;
                 cursor_y -= module.line_height;
 
             }
@@ -177,8 +180,8 @@ int console_printf(const char *format, ...) {
                     memcpy(im[ypos - module.line_height], im[ypos], gl_get_width() * 4);
                     // printf("SCROLLING");
                 }
-                memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
-               
+                // memset(im[gl_get_height() - module.line_height], 0, gl_get_width() * module.line_height * 4);
+                gl_draw_rect(0,cursor_y, gl_get_width(),module.line_height, module.bg_color);
                 cursor_y -= module.line_height;
                 // for(int yp = module.line_height; yp < cursor_y; yp ++){
                 //     for(int xp = 0; xp < gl_get_width() ; xp++){
