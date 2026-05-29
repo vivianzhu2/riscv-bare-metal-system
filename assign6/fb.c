@@ -87,6 +87,9 @@ void fb_init(int width, int height, fb_mode_t mode) {
             // wpuld you only nned to free the draw buffer? 
         
         }
+        if(module.framebuffer != NULL){ // check if framebuffer already allocated
+            free(module.framebuffer); // deallocate previous memory
+        }
         module.buffers[0] = malloc(nbytes);
         memset(module.buffers[0], 0x0, nbytes);
         module.buffers[1] = malloc(nbytes);
@@ -98,6 +101,17 @@ void fb_init(int width, int height, fb_mode_t mode) {
     else{ // allocate single buffer
         if(module.framebuffer != NULL){ // check if framebuffer already allocated
             free(module.framebuffer); // deallocate previous memory
+        }
+
+        if(module.buffers[0] != NULL) // check if buffers already allocated
+        {
+            free(module.buffers[0]); // deallocate previous memory
+        }
+        
+        if(module.buffers[1] != NULL){ // check if buffers already allocated
+            free(module.buffers[1]); // deallocate previous memory
+            // wpuld you only nned to free the draw buffer? 
+        
         }
         module.framebuffer = malloc(nbytes);
         memset(module.framebuffer, 0x0, nbytes);

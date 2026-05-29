@@ -47,9 +47,9 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
 
     // initialize text contents to empty
     int width = ncols * gl_get_char_width();
-    int height = nrows * gl_get_char_height();
+    int height = nrows *module.line_height;// gl_get_char_height();
 
-    printf("WIDTH: %d HEIGHT: %d", width, height);
+    //printf("WIDTH: %d HEIGHT: %d", width, height);
 
     gl_init(width, height, GL_DOUBLEBUFFER); 
 

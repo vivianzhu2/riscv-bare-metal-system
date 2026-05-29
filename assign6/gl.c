@@ -66,7 +66,7 @@ int gl_get_height(void) {
  */
 color_t gl_color(uint8_t r, uint8_t g, uint8_t b) {
 
-    int opaque = 0xff;
+    //int opaque = 0xff;
     int color = 0xff000000;
     int maskr =  0x00ff0000;
     int shiftr = r << 16;
@@ -177,21 +177,34 @@ color_t gl_read_pixel(int x, int y) {
  */
 void gl_draw_rect(int x, int y, int w, int h, color_t c) {
 
-    if( (x+w) >= gl_get_width() || (y+h) >= gl_get_height() || (x+w) < 0 || (y+h) < 0){ // if rectangle is outside bounds of framebuffer, only draw the part that is within bounds
-        for(int i = x; i < gl_get_width(); i ++){
-            for(int j = y; j < gl_get_height(); j++){
-                gl_draw_pixel(i,j,c);
-            }
-        }
-    }
-    else{ // if rectangle is within bounds of framebuffer, draw the whole rectangle
         for(int k = x; k < x + w; k ++){
             for(int m = y; m < y + h; m++){
-                gl_draw_pixel(k,m,c);
+                if(k < 0 || k >= gl_get_width() || m < 0 || m >= gl_get_height()){ // if location is outside bounds of framebuffer, do not draw the pixel
+                    continue;
+                }
+                else{ // if location is within bounds of framebuffer, draw the pixel in color c
+                    gl_draw_pixel(k,m,c);
+                }
             }
+                
         }
+    
+    // if( (x+w) >= gl_get_width() || (y+h) >= gl_get_height() || (x+w) < 0 || (y+h) < 0){ // if rectangle is outside bounds of framebuffer, only draw the part that is within bounds
+    //     for(int i = x; i < gl_get_width(); i ++){
+    //         for(int j = y; j < gl_get_height(); j++){
+
+    //             gl_draw_pixel(i,j,c);
+    //         }
+    //     }
+    // }
+    // else{ // if rectangle is within bounds of framebuffer, draw the whole rectangle
+    //     for(int k = x; k < x + w; k ++){
+    //         for(int m = y; m < y + h; m++){
+    //             gl_draw_pixel(k,m,c);
+    //         }
+    //     }
    
-    }
+    // }
 }
 
 /*
@@ -213,11 +226,12 @@ void gl_draw_char(int x, int y, char ch, color_t c) {
 
     int nbytes = gl_get_char_height() * gl_get_char_width();
     uint8_t buffer[nbytes];
-    font_get_glyph(ch, buffer, nbytes);
-    for(int i  = 0; i < gl_get_char_width(); i++){
-        for(int j = 0; j < gl_get_char_height(); j ++){
-            if (buffer[j * gl_get_char_width() + i] == 0xFF) { // if the pixel is "on", draw the pixel in color c
-                gl_draw_pixel(x + i, y + j,c);
+    if (font_get_glyph(ch, buffer, nbytes)) {
+        for(int i  = 0; i < gl_get_char_width(); i++){
+            for(int j = 0; j < gl_get_char_height(); j ++){
+                if (buffer[j * gl_get_char_width() + i] == 0xFF) { // if the pixel is "on", draw the pixel in color c
+                    gl_draw_pixel(x + i, y + j,c);
+                }
             }
         }
     }
