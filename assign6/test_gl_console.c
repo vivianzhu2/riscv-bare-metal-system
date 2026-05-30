@@ -448,12 +448,21 @@ static void test_console(void) {
     console_printf("abcde");
     pause("Newline test: there should be blank lines between start and end");
 
+    console_init(3, 4, GL_WHITE, GL_BLACK);
+    de_init(56, 48, 800, 600);
+    console_printf("\na 1");
+    console_printf("\nb 2");
+    console_printf("\nc 3");
+    pause("Newline test: there should be blank lines between start and end");
+
+
     console_init(3, 5, GL_WHITE, GL_BLACK);
     de_init(70,48,800,600);
     int ret_val = 0;
     ret_val = gl_get_width();
     assert(ret_val == 70);
     ret_val = gl_get_height();
+
     // WIDTH: 70 HEIGHT: 48 
 
     
