@@ -341,6 +341,9 @@ int shell_evaluate(const char *line) {
     //divide line into array of tokens -> non space chars
 
     int max = strlen(line);
+    if(max == 0){
+        return 0;
+    }   
     const char *tokens[max];
 
     memcpy(history[n_cmd], line, 128);
