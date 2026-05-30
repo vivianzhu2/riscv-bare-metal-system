@@ -249,7 +249,7 @@ void fb_swap_buffer(void) {
         module.buffers0 = module.buffers1; 
         module.buffers1 = temp;
         de_set_active_framebuffer(module.buffers0);
-        memcpy(module.buffers1,module.buffers0,module.fbsize);
+        // memcpy(module.buffers1,module.buffers0,module.fbsize);
 
         }
     }

@@ -17,6 +17,7 @@
 static struct { 
     color_t bg_color, fg_color;
     int line_height;
+    int consolesize;
 } module; 
 int cursor_x; // cursor_x and cursor_y represent the location of the upper left corner of the next character to be drawn
 int cursor_y;
@@ -49,6 +50,7 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
     int width = ncols * gl_get_char_width();
     int height = nrows * module.line_height;// gl_get_char_height();
 //  int height = nrows *module.line_height;
+    module.consolesize=width*height*4; 
     //printf("WIDTH: %d HEIGHT: %d", width, height);
     printf("%d",module.line_height);
     gl_init(width, height, GL_DOUBLEBUFFER); 
@@ -57,6 +59,7 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
     gl_swap_buffer();
     cursor_x = 0;
     cursor_y = 0;
+    gl_clear(background);
 
     // cursor is in the upper left corner
     
@@ -204,8 +207,10 @@ int console_printf(const char *format, ...) {
         
     
      }
+    unsigned int (*im)[gl_get_width()] = fb_get_draw_buffer();
     gl_swap_buffer();
-    
+    unsigned int (*imnew)[gl_get_width()] = fb_get_draw_buffer(); 
+    memcpy(imnew,im,module.consolesize);
     return result;
 
 
