@@ -104,13 +104,13 @@ static void test_heap_dump(void) {
     int *p = malloc(sizeof(int));
     // *p = 0;
     // p+=2;
-    *(p+2) = 0;
+    *p = 0;
     heap_dump("After p = malloc(4)");
 
     char *q = malloc(16);
     //q+=8;
 
-    memcpy(q + 8, "aaaaaaaaaaaaaaa", 16);
+    memcpy(q, "aaaaaaaaaaaaaaa", 16);
     heap_dump("After q = malloc(16)");
 
     free(p);
@@ -127,20 +127,20 @@ static void test_heap_simple(void) {
     int len = strlen(alphabet);
 
     char *str = malloc(len + 1);
-    memcpy(str + 8, alphabet, len + 1);
+    memcpy(str, alphabet, len + 1);
     heap_dump("After malloc alphabet");
     int n = 10;
     int *arr = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++) {
-        arr[i + 2] = i;
+        arr[i] = i;
     }
-    printf("str %s  %s",(char*)(str + 8), alphabet);
+    printf("str %s  %s",(char*)(str), alphabet);
     printf("arr %d", arr[10]);
-    assert(strcmp(str + 8, alphabet) == 0);
+    assert(strcmp(str, alphabet) == 0);
     heap_dump("After malloc 10 arr");
     free(str);
     heap_dump("After free str");
-    assert(arr[2] == 0 && arr[n+1] == n-1);
+    assert(arr[0] == 0 && arr[n-1] == n-1);
     free(arr);
     heap_dump("After free arr");
 }
@@ -176,17 +176,17 @@ static void test_heap_multiple(void) {
     for (int i = 0; i < n; i++) {
         int num_repeats = i + 1 ;
         char *ptr = malloc(num_repeats + 1);
-        memset(ptr + 8, 'A' - 1 + num_repeats, num_repeats);
+        memset(ptr, 'A' - 1 + num_repeats, num_repeats);
 
         
-        ptr[num_repeats + 8] = '\0';
+        ptr[num_repeats] = '\0';
         arr[i] = ptr;
         printf("allocate: i: %d, arr[i]: %p", i, arr[i]);
     }
     heap_dump("After all allocations");
     for (int i = n-1; i >= 0; i--) {
-        int len = strlen(arr[i]+8);
-        char first = arr[i][8], last = arr[i][len -1 + 8];
+        int len = strlen(arr[i]);
+        char first = arr[i][0], last = arr[i][len -1];
         printf("i: %d, arr[i]: %p, ptr: %c", i, arr[i], first);
         assert(first == 'A' - 1 + len);  // verify payload contents
         assert(first == last);

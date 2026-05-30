@@ -121,7 +121,7 @@ void *malloc(size_t nbytes) { // return pointer to newly allocated block of at l
                 count_allocs++;
                 total_bytes_requested += nbytes;
                 
-                return prevheader;
+                return (char*)prevheader + 8;
 
 
             }
@@ -151,7 +151,7 @@ void *malloc(size_t nbytes) { // return pointer to newly allocated block of at l
         nbytes = nbytes + 8;
         // cur_heap_end = (char *)cur_heap_end + nbytes;
         // return tempheader;
-        return sbrk(nbytes);
+        return (char*)sbrk(nbytes) + 8 ;
     }    
     else{ // if we have already inserted into a free block, but we have not returned yet, then we must have hit the heap end, so we can reject the request
         return NULL;
@@ -171,8 +171,8 @@ void free(void *ptr) {
     }
 
 
-    volatile struct header *ogblock = ptr;
-    struct header *headerptr = ptr;
+    volatile struct header *ogblock = (struct header *)((char*)ptr - 8);
+    struct header *headerptr = (struct header*)((char*) ptr - 8);
 
     
     if (headerptr->status == 1) {

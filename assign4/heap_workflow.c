@@ -51,9 +51,9 @@ static void report_problem(const char* format, ...);
 void main(void) {
     uart_init();
 
-    const int max_blocks = 100;
-    const int max_block_size = 256;
-    const int num_ops = 5000;
+    const int max_blocks = 200;
+    const int max_block_size = 512;
+    const int num_ops = 3000;
 
     run_workflow(max_blocks, max_block_size, num_ops);
     printf("Completed %s\n", __FILE__);
