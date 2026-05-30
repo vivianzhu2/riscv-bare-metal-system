@@ -164,7 +164,7 @@ int console_printf(const char *format, ...) {
         else{ // if the character is an ordinary character, draw the character and move cursor to the right by one character width
             // printf("Pre wrap: buf[i]: %c cursor x: %d \n cursor y: %d \n",buf[i], cursor_x, cursor_y);
             
-            if (cursor_x + gl_get_char_width() >= gl_get_width()){ //   if the character to be inserted does not fit on the current row, automatically wrap the overflow to the next row
+            if (cursor_x + gl_get_char_width() > gl_get_width()){ //   if the character to be inserted does not fit on the current row, automatically wrap the overflow to the next row
                 // 
                 cursor_y += module.line_height;
                 // cursor_x = cursor_x % gl_get_width() ;
