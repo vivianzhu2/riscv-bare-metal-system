@@ -302,7 +302,7 @@ void shell_readline(char buf[], size_t bufsize) {
             }
             //  first down key needs to be pressed twice: fix
         }
-        else if (length > bufsize - 1) {
+        else if (length >= bufsize - 1) {
             shell_bell();
             break;
         }
