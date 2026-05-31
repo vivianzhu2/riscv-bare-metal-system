@@ -189,7 +189,7 @@ static void test_gl(void) {
     gl_clear(GL_BLACK);
     printf("gl_clear(GL_BLACK) %x\n", gl_read_pixel(0, 0));
     gl_draw_rect(10, 10, 50, 30, GL_CYAN);
-    gl_swap_buffer();
+    // gl_swap_buffer();
     // corners of rect should be cyan
     // assert(gl_read_pixel(10, 10)   == GL_CYAN);
     // why did the above line fail: 
@@ -231,7 +231,7 @@ static void test_gl(void) {
     gl_draw_string(0, 0, "CS107E", GL_AMBER);
     assert(gl_read_pixel(6 * cw + 5, 0) == GL_BLACK);
     // gl_draw_char(160, 50, 'I', GL_AMBER);
-    // gl_swap_buffer();
+    gl_swap_buffer();
     pause("Added font checks");
     
     gl_clear(GL_BLACK);
@@ -259,7 +259,7 @@ static void test_gl(void) {
      */
     const uint32_t OVERSIZE_COLOR = gl_color(0xAB, 0x12, 0x56);
     gl_draw_rect(-100, -100, WIDTH + 200, HEIGHT + 200, OVERSIZE_COLOR);
-    gl_swap_buffer();
+    // gl_swap_buffer();
     
     /* Check the four corners of the framebuffer are painted with OVERSIZE_COLOR */
     assert(gl_read_pixel(0, 0) == OVERSIZE_COLOR);
@@ -337,6 +337,8 @@ static void test_gl(void) {
     assert(gl_read_pixel(0, 7) == GL_GREEN);
     assert(gl_read_pixel(24, 0) == GL_GREEN);
     pause("Green border rectangles");
+
+
     // pause("Long string test: string wraps within screen boundaries and is clipped correctly");
     // turns black here
     // why is it a black screen here?  d
@@ -447,11 +449,17 @@ static void test_console(void) {
     console_init(3, 3, GL_WHITE, GL_BLACK);
     console_printf("abcde");
     pause("Newline test: there should be blank lines between start and end");
+    console_printf("fghij");
+    pause("Newline test: there should be blank lines between start and end");
+    console_printf("klmnop");
+    pause("Newline test: there should be blank lines between start and end");
 
     console_init(3, 4, GL_WHITE, GL_BLACK);
-    de_init(56, 48, 800, 600);
+    // de_init(56, 48, 800, 600);
     console_printf("\na 1");
+    pause("Newline test: there should be blank lines between start and end");
     console_printf("\nb 2");
+    pause("Newline test: there should be blank lines between start and end");
     console_printf("\nc 3");
     pause("Newline test: there should be blank lines between start and end");
 
@@ -474,6 +482,26 @@ static void test_console(void) {
     ret_val = gl_get_height();
     assert(ret_val == 63);
 
+    console_init(3, 5, GL_WHITE, GL_BLACK);
+    console_printf("one\n");
+    pause("Now displaying console: 3 rows x 5 columns, bg black, fg white");
+    console_printf("not\b\b\btwo\n");
+    pause("Backspace test: should see 'notwo' with 'two' in white and 'no' in black");
+    console_clear();
+    pause("Console clear test: should see blank screen");
+
+
+    console_init(3, 5, GL_WHITE, GL_BLACK);
+    console_printf("1");
+    console_printf("2");
+    pause("Green border rectangles");
+    console_printf("3");
+    console_printf("4");
+    console_printf("5");
+    pause("Green border rectangles");
+    console_printf("6");
+    console_printf("7");
+
  }
 
 void main(void) {
@@ -485,8 +513,8 @@ void main(void) {
     // the functions and are ready to test them
 
     // test_fb();
-    // test_gl();
-    test_console();
+    test_gl();
+    // test_console();
 
     /***** TODO: Add more and better tests!  *****/
     printf("Completed main() in test_gl_console.c\n");

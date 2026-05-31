@@ -52,7 +52,7 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
 //  int height = nrows *module.line_height;
     module.consolesize=width*height*4; 
     //printf("WIDTH: %d HEIGHT: %d", width, height);
-    printf("%d",module.line_height);
+    // printf("%d",module.line_height);
     gl_init(width, height, GL_DOUBLEBUFFER); 
 
     gl_clear(background);
