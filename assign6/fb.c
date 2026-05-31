@@ -83,15 +83,18 @@ void fb_init(int width, int height, fb_mode_t mode) {
         if(module.buffers0 != NULL) // check if buffers already allocated
         {
             free(module.buffers0); // deallocate previous memory
+            module.buffers0 = NULL;
         }
         
         if(module.buffers1 != NULL){ // check if buffers already allocated
             free(module.buffers1); // deallocate previous memory
+            module.buffers1 = NULL;
             // wpuld you only nned to free the draw buffer? 
         
         }
         if(module.framebuffer != NULL){ // check if framebuffer already allocated
             free(module.framebuffer); // deallocate previous memory
+            module.framebuffer = NULL;
         }
         module.buffers0 = malloc(nbytes);
         memset(module.buffers0, 0x0, nbytes);
@@ -104,15 +107,18 @@ void fb_init(int width, int height, fb_mode_t mode) {
     else{ // allocate single buffer
         if(module.framebuffer != NULL){ // check if framebuffer already allocated
             free(module.framebuffer); // deallocate previous memory
+            module.framebuffer = NULL;
         }
 
         if(module.buffers0 != NULL) // check if buffers already allocated
         {
             free(module.buffers0); // deallocate previous memory
+            module.buffers0 = NULL;
         }
         
         if(module.buffers1 != NULL){ // check if buffers already allocated
             free(module.buffers1); // deallocate previous memory
+            module.buffers1 = NULL;
             // wpuld you only nned[] to free the draw buffer? 
         
         }
