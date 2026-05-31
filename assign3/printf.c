@@ -149,21 +149,21 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
             k= i + 1;
             negwidth = 0; // marker to see whether to pad on the left or the right
             star = 0; // marker to see whether to look for the next argument as field width
-            // if(format[k] == '*'){
-            //     int arg = va_arg(args, int); //look for fieldwidth in separate arg
-            //     fw = arg;
-            //     if(arg<0){
-            //         fw = -arg; 
-            //         negwidth = 1; //preserve negativity padding
-            //     }
-            //     star = 1;
-            //     i++;
-            // }
+            if(format[k] == '*'){
+                int arg = va_arg(args, int); //look for fieldwidth in separate arg
+                fw = arg;
+                if(arg<0){
+                    fw = -arg; 
+                    negwidth = 1; //preserve negativity padding
+                }
+                star = 1;
+                i++;
+            }
             if(star==0){
-                // if(format[k] == '-'){
-                //     negwidth = 1; 
-                //     k++;                
-                // }
+                if(format[k] == '-'){
+                    negwidth = 1; 
+                    k++;                
+                }
                 tempfw[0] = '\0';
                 while(format[k] >= '0' && format[k] <= '9' && star == 0){
                     tempfw[k - i - 1 -negwidth] = format[k];// collect width digits into temp buffer
@@ -796,7 +796,9 @@ int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
         }
 
     }
-    
+    // if(bufsize == 0){
+    //    buf = NULL; // if buffer size is 0, return length of full output without writing anything
+    // }
     // va_end(args);
     return  totallen;
 

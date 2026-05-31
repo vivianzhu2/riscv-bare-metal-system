@@ -316,8 +316,10 @@ static void test_snprintf(void) { // snprintf tests are in test_printf.c
     assert(strcmp(buf, " -36") == 0);
 
     snprintf(buf, 0, "No room at the inn");
+    printf("buf:%s", buf);
+    // printf("\n");
     assert(strcmp(buf, "") == 0); // dst should not be modified when bufsize is 0
-    // assert(buf == NULL);
+    assert(buf[0] == '\0');
     assert(strlen(buf)==0);
     assert(snprintf(buf, 0, "No room at the inn") == 18); // return value should be length of full output even when bufsize is 0
 
