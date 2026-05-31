@@ -317,10 +317,11 @@ static void test_gl(void) {
     gl_clear(GL_BLACK);
 // does not draw rect here
     gl_draw_rect(0,0, 3,3, GL_YELLOW);
-    gl_swap_buffer();
+    
     assert(gl_read_pixel(0, 0) == GL_YELLOW);
     assert(gl_read_pixel(2, 2) == GL_YELLOW);
     assert(gl_read_pixel(3, 0) == GL_BLACK);
+    gl_swap_buffer();
     pause("Yellow rectangle");
 
     gl_draw_rect(8,3, 5,2, GL_BLUE);
@@ -513,8 +514,8 @@ void main(void) {
     // the functions and are ready to test them
 
     // test_fb();
-    test_gl();
-    // test_console();
+    // test_gl();
+    test_console();
 
     /***** TODO: Add more and better tests!  *****/
     printf("Completed main() in test_gl_console.c\n");

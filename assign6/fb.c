@@ -20,7 +20,7 @@ static struct{
     void *framebuffer;     // address of framebuffer memor
     
     void *buffers0;
-    void *buffers1; ;
+    void *buffers1; 
     int fbsize;
     int current;
 
