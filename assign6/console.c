@@ -78,6 +78,9 @@ void console_init(int nrows, int ncols, color_t foreground, color_t background) 
  */
 void console_clear(void) {
     gl_clear(module.bg_color);
+    gl_swap_buffer();
+    gl_clear(module.bg_color);
+
     cursor_x = 0;
     cursor_y = 0;
 }
