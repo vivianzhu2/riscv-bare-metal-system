@@ -79,23 +79,23 @@ void fb_init(int width, int height, fb_mode_t mode) {
     module.current = 0;
     module.fbsize = module.width * module.height * module.depth;
     if(mode == FB_DOUBLEBUFFER){ // allocate two buffers
- 
+ // && module.framebuffer != (void*)-1
         if(module.buffers0 != NULL) // check if buffers already allocated
         {
             free(module.buffers0); // deallocate previous memory
             module.buffers0 = NULL;
         }
         
-        if(module.buffers1 != NULL){ // check if buffers already allocated
+        if(module.buffers1 != NULL ){ // check if buffers already allocated
             free(module.buffers1); // deallocate previous memory
             module.buffers1 = NULL;
             // wpuld you only nned to free the draw buffer? 
         
         }
-        if(module.framebuffer != NULL){ // check if framebuffer already allocated
-            free(module.framebuffer); // deallocate previous memory
-            module.framebuffer = NULL;
-        }
+        // if(module.framebuffer != NULL){ // check if framebuffer already allocated
+        //     free(module.framebuffer); // deallocate previous memory
+        //     module.framebuffer = NULL;
+        // }
         module.buffers0 = malloc(nbytes);
         memset(module.buffers0, 0x0, nbytes);
         module.buffers1 = malloc(nbytes);
@@ -110,18 +110,18 @@ void fb_init(int width, int height, fb_mode_t mode) {
             module.framebuffer = NULL;
         }
 
-        if(module.buffers0 != NULL) // check if buffers already allocated
-        {
-            free(module.buffers0); // deallocate previous memory
-            module.buffers0 = NULL;
-        }
+        // if(module.buffers0 != NULL) // check if buffers already allocated
+        // {
+        //     free(module.buffers0); // deallocate previous memory
+        //     module.buffers0 = NULL;
+        // }
         
-        if(module.buffers1 != NULL){ // check if buffers already allocated
-            free(module.buffers1); // deallocate previous memory
-            module.buffers1 = NULL;
-            // wpuld you only nned[] to free the draw buffer? 
+        // if(module.buffers1 != NULL){ // check if buffers already allocated
+        //     free(module.buffers1); // deallocate previous memory
+        //     module.buffers1 = NULL;
+        //     // wpuld you only nned[] to free the draw buffer? 
         
-        }
+        // }
         module.framebuffer = malloc(nbytes);
         memset(module.framebuffer, 0x0, nbytes);
     }
