@@ -131,7 +131,10 @@ void num_to_string(unsigned long num, int base, char *outstr) {
  * Also handles field widths like %8d or %04x.
  */
 int vsnprintf(char *buf, size_t bufsize, const char *format, va_list args) {
-    buf[0] = '\0'; // start with empty string in buffer
+    if(bufsize != 0){
+        buf[0] = '\0'; // if buffer size is 0, return length of full output without writing anything
+    }
+     // start with empty string in buffer
     int exp_length = 0; // return value from strlcat (expected final length)
     char temp[2] = "";
     char *new = temp;
